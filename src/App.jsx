@@ -13,7 +13,7 @@ function App() {
   return (
     <CartProvider>
       <Router>
-        <div className="max-w-lg mx-auto bg-white min-h-screen shadow-lg">
+        <div className="min-h-screen bg-gray-50">
           <Routes>
             {/* 홈 페이지 */}
             <Route path="/" element={<HomePage />} />

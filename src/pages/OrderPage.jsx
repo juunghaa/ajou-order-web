@@ -39,28 +39,21 @@ const OrderPage = () => {
   const [loading, setLoading] = useState(false);
   const [orderNote, setOrderNote] = useState('');
   
+  const formatPrice = (price) => new Intl.NumberFormat('ko-KR').format(price);
+  
   // 장바구니가 비어있으면 홈으로
   if (items.length === 0) {
     navigate('/');
     return null;
   }
   
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('ko-KR').format(price);
-  };
-  
   // 주문 처리
   const handleOrder = async () => {
     setLoading(true);
     
     try {
-      // 실제로는 Firebase에 주문 저장
-      // const orderId = await createOrder({ items, cafe, totalPrice, payment: selectedPayment, note: orderNote });
-      
-      // 결제 시뮬레이션 (2초 대기)
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // 주문 데이터 생성
       const orderData = {
         orderId: `AO${Date.now()}`,
         items,
@@ -73,13 +66,8 @@ const OrderPage = () => {
         estimatedTime: '10-15분',
       };
       
-      // 로컬 스토리지에 최근 주문 저장
       localStorage.setItem('ajouorder_last_order', JSON.stringify(orderData));
-      
-      // 장바구니 비우기
       clearCart();
-      
-      // 주문 완료 페이지로 이동
       navigate('/order/complete');
     } catch (error) {
       console.error('주문 실패:', error);
@@ -90,106 +78,140 @@ const OrderPage = () => {
   };
   
   return (
-    <div className="page-container pb-32">
+    <div className="min-h-screen bg-gray-50 pb-32 lg:pb-8">
       <Header title="주문하기" />
       
-      {/* 주문 매장 */}
-      <div className="px-4 py-4 bg-white border-b border-gray-100">
-        <h2 className="text-sm font-medium text-gray-500 mb-2">주문 매장</h2>
-        <p className="font-semibold text-gray-900">{cafe?.name}</p>
-      </div>
-      
-      {/* 주문 메뉴 요약 */}
-      <div className="px-4 py-4 bg-white border-b border-gray-100">
-        <h2 className="text-sm font-medium text-gray-500 mb-3">주문 메뉴</h2>
-        <div className="space-y-2">
-          {items.map((item, index) => (
-            <div key={index} className="flex justify-between text-sm">
-              <span className="text-gray-700">
-                {item.name} x {item.quantity}
-              </span>
-              <span className="text-gray-900 font-medium">
-                {formatPrice(item.price * item.quantity)}원
-              </span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="lg:flex lg:gap-8">
+          {/* 주문 정보 입력 */}
+          <div className="flex-1 space-y-6">
+            {/* 주문 매장 */}
+            <div className="bg-white rounded-2xl shadow-card p-6">
+              <h2 className="font-bold text-gray-900 mb-3">주문 매장</h2>
+              <p className="text-lg font-semibold text-ajou-primary">{cafe?.name}</p>
             </div>
-          ))}
-        </div>
-        <div className="border-t border-gray-100 mt-3 pt-3 flex justify-between">
-          <span className="font-semibold text-gray-900">합계</span>
-          <span className="font-bold text-ajou-primary">{formatPrice(totalPrice)}원</span>
-        </div>
-      </div>
-      
-      {/* 요청사항 */}
-      <div className="px-4 py-4 bg-white border-b border-gray-100">
-        <h2 className="text-sm font-medium text-gray-500 mb-3">요청사항</h2>
-        <textarea
-          value={orderNote}
-          onChange={(e) => setOrderNote(e.target.value)}
-          placeholder="예: 얼음 적게 해주세요"
-          className="input-field resize-none h-20"
-          maxLength={100}
-        />
-        <p className="text-xs text-gray-400 mt-1 text-right">
-          {orderNote.length}/100
-        </p>
-      </div>
-      
-      {/* 결제 수단 */}
-      <div className="px-4 py-4 bg-white">
-        <h2 className="text-sm font-medium text-gray-500 mb-3">결제 수단</h2>
-        <div className="space-y-2">
-          {PAYMENT_METHODS.map((method) => {
-            const Icon = method.icon;
-            return (
-              <label
-                key={method.id}
-                className={`
-                  flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all
-                  ${selectedPayment === method.id 
-                    ? 'border-ajou-primary bg-ajou-light' 
-                    : 'border-gray-200 hover:border-gray-300'}
-                `}
-              >
-                <input
-                  type="radio"
-                  name="payment"
-                  value={method.id}
-                  checked={selectedPayment === method.id}
-                  onChange={(e) => setSelectedPayment(e.target.value)}
-                  className="w-5 h-5 text-ajou-primary focus:ring-ajou-primary"
-                />
-                <Icon />
-                <span className="font-medium text-gray-900">{method.name}</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
-      
-      {/* 결제 안내 */}
-      <div className="px-4 py-4 bg-gray-50">
-        <p className="text-xs text-gray-500 leading-relaxed">
-          • 주문 후 취소는 매장에 직접 문의해주세요.<br />
-          • 결제 완료 후 예상 대기 시간이 안내됩니다.<br />
-          • 본 서비스는 결제 시뮬레이션입니다.
-        </p>
-      </div>
-      
-      {/* 하단 결제 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-modal z-50">
-        <div className="max-w-lg mx-auto px-4 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-gray-600">총 결제 금액</span>
-            <span className="text-2xl font-bold text-ajou-primary">
-              {formatPrice(totalPrice)}원
-            </span>
+            
+            {/* 주문 메뉴 */}
+            <div className="bg-white rounded-2xl shadow-card p-6">
+              <h2 className="font-bold text-gray-900 mb-4">주문 메뉴</h2>
+              <div className="space-y-3">
+                {items.map((item, index) => (
+                  <div key={index} className="flex justify-between py-2 border-b border-gray-50 last:border-0">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="w-12 h-12 rounded-lg object-cover"
+                      />
+                      <div>
+                        <span className="text-gray-700">{item.name}</span>
+                        <span className="text-gray-400 ml-2">x {item.quantity}</span>
+                      </div>
+                    </div>
+                    <span className="text-gray-900 font-medium">
+                      {formatPrice(item.price * item.quantity)}원
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* 요청사항 */}
+            <div className="bg-white rounded-2xl shadow-card p-6">
+              <h2 className="font-bold text-gray-900 mb-3">요청사항</h2>
+              <textarea
+                value={orderNote}
+                onChange={(e) => setOrderNote(e.target.value)}
+                placeholder="예: 얼음 적게 해주세요"
+                className="input-field resize-none h-24"
+                maxLength={100}
+              />
+              <p className="text-xs text-gray-400 mt-2 text-right">{orderNote.length}/100</p>
+            </div>
+            
+            {/* 결제 수단 */}
+            <div className="bg-white rounded-2xl shadow-card p-6">
+              <h2 className="font-bold text-gray-900 mb-4">결제 수단</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {PAYMENT_METHODS.map((method) => {
+                  const Icon = method.icon;
+                  return (
+                    <label
+                      key={method.id}
+                      className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all
+                        ${selectedPayment === method.id 
+                          ? 'border-ajou-primary bg-ajou-light' 
+                          : 'border-gray-200 hover:border-gray-300'}`}
+                    >
+                      <input
+                        type="radio"
+                        name="payment"
+                        value={method.id}
+                        checked={selectedPayment === method.id}
+                        onChange={(e) => setSelectedPayment(e.target.value)}
+                        className="w-5 h-5 text-ajou-primary focus:ring-ajou-primary"
+                      />
+                      <Icon />
+                      <span className="font-medium text-gray-900">{method.name}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-          <Button
-            size="full"
-            onClick={handleOrder}
-            loading={loading}
-          >
+          
+          {/* 결제 정보 (데스크탑 사이드바) */}
+          <div className="lg:w-96 lg:flex-shrink-0 mt-6 lg:mt-0">
+            <div className="bg-white rounded-2xl shadow-card p-6 lg:sticky lg:top-24">
+              <h3 className="font-bold text-lg text-gray-900 mb-4">결제 정보</h3>
+              
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">상품 금액</span>
+                  <span className="text-gray-900">{formatPrice(totalPrice)}원</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">할인 금액</span>
+                  <span className="text-ajou-accent">-0원</span>
+                </div>
+                <div className="border-t border-gray-100 pt-3">
+                  <div className="flex justify-between">
+                    <span className="font-semibold text-gray-900">총 결제 금액</span>
+                    <span className="font-bold text-2xl text-ajou-primary">
+                      {formatPrice(totalPrice)}원
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* 데스크탑 결제 버튼 */}
+              <div className="hidden lg:block mt-6">
+                <Button size="full" onClick={handleOrder} loading={loading}>
+                  {loading ? '결제 처리 중...' : `${formatPrice(totalPrice)}원 결제하기`}
+                </Button>
+              </div>
+              
+              {/* 안내 */}
+              <div className="mt-6 p-4 bg-gray-50 rounded-xl">
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  • 주문 후 취소는 매장에 직접 문의해주세요.<br />
+                  • 결제 완료 후 예상 대기 시간이 안내됩니다.<br />
+                  • 본 서비스는 결제 시뮬레이션입니다.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* 모바일 하단 결제 버튼 */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-modal z-50">
+        <div className="max-w-lg mx-auto px-4 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-gray-600">총 결제 금액</span>
+            <span className="text-xl font-bold text-ajou-primary">{formatPrice(totalPrice)}원</span>
+          </div>
+          <Button size="full" onClick={handleOrder} loading={loading}>
             {loading ? '결제 처리 중...' : `${formatPrice(totalPrice)}원 결제하기`}
           </Button>
         </div>
