@@ -1,70 +1,117 @@
-# Getting Started with Create React App
+# AjouOrder - 아주대 캠퍼스 카페 주문 앱
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+아주대학교 캠퍼스 내 카페 모바일 주문 서비스입니다.
 
-## Available Scripts
+## 📁 프로젝트 구조
 
-In the project directory, you can run:
+```
+src/
+├── components/
+│   ├── common/          # 공통 컴포넌트
+│   │   ├── Header.jsx   # 헤더 (뒤로가기, 장바구니)
+│   │   ├── Button.jsx   # 버튼 컴포넌트
+│   │   ├── Modal.jsx    # 모달 컴포넌트
+│   │   └── Loading.jsx  # 로딩, 스켈레톤
+│   ├── menu/            # 메뉴 관련
+│   │   ├── MenuCard.jsx    # 메뉴 카드
+│   │   ├── MenuList.jsx    # 메뉴 리스트 (검색, 카테고리)
+│   │   └── MenuDetail.jsx  # 메뉴 상세 모달
+│   └── cart/            # 장바구니 관련
+│       ├── CartItem.jsx    # 장바구니 아이템
+│       └── CartSummary.jsx # 장바구니 요약, 플로팅 버튼
+├── pages/               # 페이지 컴포넌트
+│   ├── HomePage.jsx        # 홈 (카페 선택)
+│   ├── MenuPage.jsx        # 메뉴 페이지
+│   ├── CartPage.jsx        # 장바구니
+│   ├── OrderPage.jsx       # 주문/결제
+│   └── OrderCompletePage.jsx # 주문 완료
+├── context/
+│   └── CartContext.jsx  # 장바구니 전역 상태
+├── firebase/
+│   └── config.js        # Firebase 설정
+├── App.jsx              # 라우팅
+├── index.js             # 엔트리 포인트
+└── index.css            # 글로벌 스타일
+```
 
-### `npm start`
+## 🚀 설치 및 실행
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 1. 필수 패키지 설치
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+# 이미 create-react-app으로 생성했다면:
+npm install react-router-dom firebase tailwindcss postcss autoprefixer
+```
 
-### `npm test`
+### 2. Tailwind CSS 설정
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+npx tailwindcss init -p
+```
 
-### `npm run build`
+그리고 `tailwind.config.js` 파일을 프로젝트의 것으로 교체하세요.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 3. Firebase 설정
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+`src/firebase/config.js` 파일에서 본인의 Firebase 프로젝트 설정으로 변경:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```javascript
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+```
 
-### `npm run eject`
+### 4. 실행
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```bash
+npm start
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 🎨 디자인 시스템
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### 컬러
+- **아주블루 Primary**: `#0E4A84`
+- **아주블루 Secondary**: `#1565C0`
+- **아주블루 Light**: `#E3F2FD`
+- **아주블루 Dark**: `#0D3A6B`
+- **Accent (오렌지)**: `#FF6B35`
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### 컴포넌트 클래스
+- `.btn-primary` - 기본 버튼
+- `.btn-secondary` - 보조 버튼
+- `.btn-ghost` - 고스트 버튼
+- `.card` - 카드 컴포넌트
+- `.input-field` - 입력 필드
+- `.badge-primary` - 프라이머리 뱃지
+- `.badge-accent` - 액센트 뱃지
 
-## Learn More
+## 📱 주요 기능
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+1. **카페 선택** - 캠퍼스 내 카페 목록 및 영업 상태 표시
+2. **메뉴 보기** - 카테고리별 메뉴, 검색, 인기/신메뉴 표시
+3. **옵션 선택** - 온도, 사이즈, 추가 옵션 선택
+4. **장바구니** - 수량 조절, 삭제, 다른 카페 주문 시 초기화 확인
+5. **주문하기** - 결제 수단 선택, 요청사항 입력
+6. **결제 시뮬레이션** - 결제 처리 및 주문 완료 화면
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## 🔧 TODO (Phase 2)
 
-### Code Splitting
+- [ ] Firebase Auth 로그인 구현
+- [ ] Firestore 실제 데이터 연동
+- [ ] 주문 내역 페이지
+- [ ] 푸시 알림 (픽업 알림)
+- [ ] 혼잡도 표시
+- [ ] 메뉴 추천 기능
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## 📦 사용 기술
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- React 18
+- React Router DOM
+- Tailwind CSS
+- Firebase (Firestore, Auth)
+- Context API (상태 관리)
