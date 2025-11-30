@@ -33,15 +33,17 @@ const cartReducer = (state, action) => {
   switch (action.type) {
     case ACTIONS.ADD_ITEM: {
       const { item } = action.payload;
+      const quantityToAdd = item.quantity || 1; // 선택된 수량 반영 (없으면 1)
       
       // 다른 카페 상품이면 장바구니 초기화 확인
       if (state.cafe && state.cafe.id !== item.cafeId) {
         const confirm = window.confirm(
-          '다른 카페의 메뉴를 담으시겠습니까?\n기존 장바구니가 비워집니다.'
+          `다른 카페(${item.cafeName})의 메뉴를 담으시겠습니까?\n기존 장바구니가 비워집니다.`
         );
         if (!confirm) return state;
         
-        const newItems = [{ ...item, quantity: 1 }];
+        // 장바구니 초기화 후 새 아이템 추가
+        const newItems = [{ ...item, quantity: quantityToAdd }];
         return {
           ...state,
           items: newItems,
@@ -50,20 +52,20 @@ const cartReducer = (state, action) => {
         };
       }
       
-      // 이미 있는 상품인지 확인
+      // 이미 있는 상품인지 확인 (ID와 옵션이 모두 같아야 함)
       const existingIndex = state.items.findIndex(
         (i) => i.id === item.id && JSON.stringify(i.options) === JSON.stringify(item.options)
       );
       
       let newItems;
       if (existingIndex >= 0) {
-        // 수량 증가
+        // 이미 있으면 수량만 증가 (기존 수량 + 추가된 수량)
         newItems = state.items.map((i, idx) =>
-          idx === existingIndex ? { ...i, quantity: i.quantity + 1 } : i
+          idx === existingIndex ? { ...i, quantity: i.quantity + quantityToAdd } : i
         );
       } else {
         // 새 상품 추가
-        newItems = [...state.items, { ...item, quantity: 1 }];
+        newItems = [...state.items, { ...item, quantity: quantityToAdd }];
       }
       
       return {
@@ -76,6 +78,7 @@ const cartReducer = (state, action) => {
     
     case ACTIONS.REMOVE_ITEM: {
       const { itemId, options } = action.payload;
+      // 옵션까지 비교하여 정확한 아이템 삭제
       const newItems = state.items.filter(
         (i) => !(i.id === itemId && JSON.stringify(i.options) === JSON.stringify(options))
       );
@@ -92,7 +95,7 @@ const cartReducer = (state, action) => {
       const { itemId, options, quantity } = action.payload;
       
       if (quantity <= 0) {
-        // 수량이 0 이하면 삭제
+        // 수량이 0 이하면 삭제 처리
         return cartReducer(state, {
           type: ACTIONS.REMOVE_ITEM,
           payload: { itemId, options },
@@ -145,6 +148,8 @@ export const CartProvider = ({ children }) => {
         dispatch({ type: ACTIONS.LOAD_CART, payload: parsed });
       } catch (e) {
         console.error('장바구니 로드 실패:', e);
+        // 에러 발생 시 초기화
+        dispatch({ type: ACTIONS.CLEAR_CART });
       }
     }
   }, []);
@@ -172,7 +177,7 @@ export const CartProvider = ({ children }) => {
   };
   
   const value = {
-    ...state,
+    ...state, // items, cafe, totalItems, totalPrice 포함됨
     addItem,
     removeItem,
     updateQuantity,

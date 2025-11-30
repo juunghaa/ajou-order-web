@@ -6,13 +6,14 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // 아주블루 컬러 시스템
+        // 새로운 컬러 시스템
         ajou: {
-          primary: '#0E4A84',      // 메인 아주블루
-          secondary: '#1565C0',    // 밝은 블루
-          light: '#E3F2FD',        // 연한 블루 배경
-          dark: '#0D3A6B',         // 진한 블루
-          accent: '#FF6B35',       // 포인트 오렌지
+          primary: '#1F2F98',      // 메인 딥블루
+          secondary: '#787FF6',    // 밝은 퍼플블루
+          light: '#E8EAFF',        // 연한 블루 배경
+          dark: '#151F6D',         // 진한 네이비
+          accent: '#C55B9D',       // 포인트 브라운핑크
+          'accent-light': '#F5E6F0', // 연한 핑크 배경
         },
         // 그레이 스케일
         gray: {
@@ -33,13 +34,14 @@ module.exports = {
       },
       boxShadow: {
         'card': '0 2px 8px rgba(0, 0, 0, 0.08)',
-        'card-hover': '0 4px 16px rgba(0, 0, 0, 0.12)',
+        'card-hover': '0 8px 24px rgba(31, 47, 152, 0.15)',
         'modal': '0 8px 32px rgba(0, 0, 0, 0.16)',
       },
       borderRadius: {
         'xl': '16px',
         '2xl': '20px',
-        '3xl': '24px',
+        '3xl': '28px',
+        '4xl': '32px',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',

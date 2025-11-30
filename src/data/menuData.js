@@ -1,0 +1,397 @@
+// src/data/menuData.js
+
+// ============================================
+// CAFÉ ING (일신관 1층)
+// ============================================
+export const CAFE_ING_MENUS = {
+    cafeId: 'ajou-cafe-3',
+    cafeName: 'CAFÉ ING',
+    categories: ['Signature', 'Coffee'],
+    menus: [
+      // Signature
+      { 
+        id: 'ing-1', name: '바닐라빈 푸딩 슈크림 라떼', nameEn: 'Vanillabean Puding Custardcream Latte', price: 3900, category: 'Signature', isNew: true, options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-2', name: '코코초코 푸딩 라떼', nameEn: 'Cocochoco Puding Latte', price: 3900, category: 'Signature', isNew: true, options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-3', name: '바닐라빈 푸딩 슈크림 프라페', nameEn: 'Vanillabean Puding Custardcream Frappe', price: 4400, category: 'Signature', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-4', name: '코코초코 푸딩 프라페', nameEn: 'Cocochoco Puding Frappe', price: 4400, category: 'Signature', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      
+      // Coffee
+      { 
+        id: 'ing-5', name: 'ING VENTI 아메리카노', nameEn: 'ING Venti Americano', price: 1500, category: 'Coffee', isPopular: true, options: { temperature: ['HOT', 'ICE'], size: [{ name: 'Regular', price: 0 }, { name: 'Venti', price: 500 }], extra: [{ name: '샷 추가', price: 500 }] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-6', name: '디카페인 아메리카노', nameEn: 'Decaffeine Americano', price: 2500, category: 'Coffee', isNew: true, options: { temperature: ['HOT', 'ICE'], size: [{ name: 'Regular', price: 0 }, { name: 'Large', price: 500 }] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-7', name: '카페라떼', nameEn: 'Caffe Latte', price: 2700, category: 'Coffee', options: { temperature: ['HOT', 'ICE'], extra: [{ name: '샷 추가', price: 500 }] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-8', name: '카푸치노', nameEn: 'Cappuccino', price: 2700, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-9', name: '헤이즐넛', nameEn: 'Hazelnut', price: 2500, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-10', name: '카라멜 마끼아또', nameEn: 'Caramel Macchiato', price: 3500, category: 'Coffee', isPopular: true, options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-11', name: '연유라떼', nameEn: 'Condensed Milk Latte', price: 3700, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-12', name: '흑당라떼', nameEn: 'Black Sugar Latte', price: 3700, category: 'Coffee', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-13', name: '아인슈페너', nameEn: 'Einspanner', price: 3300, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-14', name: '아인슈페너 라떼', nameEn: 'Einspanner Latte', price: 3800, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-15', name: '콜드브루', nameEn: 'Cold Brew', price: 3300, category: 'Coffee', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-16', name: '콜드브루 라떼', nameEn: 'Cold Brew Latte', price: 3800, category: 'Coffee', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-17', name: '카페라떼 바닐라/헤이즐넛', nameEn: 'Caffe Latte Vanilla/Hazelnut', price: 3200, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'ing-18', name: '카페모카 다크', nameEn: 'Caffe Mocha Dark', price: 3700, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+    ],
+  };
+  
+  // ============================================
+  // 팬도로시 (학생회관/도서관/다산관)
+  // ============================================
+  export const PANDOROSY_MENUS = {
+    cafeId: 'ajou-cafe-1',
+    cafeName: '팬도로시',
+    categories: ['COFFEE ICE', 'COFFEE HOT', 'BEVERAGE', 'MILK BUBBLETEA', 'ADE & TEA', 'FRUIT TEA'],
+    menus: [
+      // COFFEE ICE
+      { 
+        id: 'pan-1', name: '아메리카노', nameEn: 'Americano', price: 1200, category: 'COFFEE ICE', isPopular: true, options: { temperature: ['ICE'], extra: [{ name: '샷 추가', price: 300 }] }, 
+        imageUrl: 'https://imagecdn.dpon.gift/images/merchandises/%EC%95%84%EC%9D%B4%EC%8A%A4-%EC%95%84%EB%A9%94%EB%A6%AC%EC%B9%B4%EB%85%B8-P.jpg' 
+      },
+      { 
+        id: 'pan-2', name: '달달 아메리카노', nameEn: 'Sweet Americano', price: 1600, category: 'COFFEE ICE', options: { temperature: ['ICE'] }, 
+        imageUrl: 'https://imagecdn.dpon.gift/images/merchandises/%EC%95%84%EC%9D%B4%EC%8A%A4-%EC%95%84%EB%A9%94%EB%A6%AC%EC%B9%B4%EB%85%B8-P.jpg' 
+      },
+      { 
+        id: 'pan-3', name: '카페라떼', nameEn: 'Caffe Latte', price: 1700, category: 'COFFEE ICE', options: { temperature: ['ICE'], extra: [{ name: '샷 추가', price: 300 }] }, 
+        imageUrl: 'https://www.shutterstock.com/image-photo/refreshing-iced-cinnamon-cafe-latte-260nw-2645477683.jpg' 
+      },
+      { 
+        id: 'pan-4', name: '바닐라 카페라떼', nameEn: 'Vanilla Caffe Latte', price: 1800, category: 'COFFEE ICE', options: { temperature: ['ICE'] }, 
+        imageUrl: 'https://www.shutterstock.com/image-photo/refreshing-iced-cinnamon-cafe-latte-260nw-2645477683.jpg' 
+      },
+      { 
+        id: 'pan-5', name: '카라멜 카페라떼', nameEn: 'Caramel Caffe Latte', price: 1800, category: 'COFFEE ICE', isPopular: true, options: { temperature: ['ICE'] }, 
+        imageUrl: 'https://www.shutterstock.com/image-photo/refreshing-iced-cinnamon-cafe-latte-260nw-2645477683.jpg' 
+      },
+      { 
+        id: 'pan-6', name: '헤이즐넛 카페라떼', nameEn: 'Hazelnut Caffe Latte', price: 1800, category: 'COFFEE ICE', options: { temperature: ['ICE'] }, 
+        imageUrl: 'https://www.shutterstock.com/image-photo/refreshing-iced-cinnamon-cafe-latte-260nw-2645477683.jpg' 
+      },
+      { 
+        id: 'pan-7', name: '달달 카페라떼', nameEn: 'Sweet Caffe Latte', price: 1900, category: 'COFFEE ICE', options: { temperature: ['ICE'] }, 
+        imageUrl: 'https://www.shutterstock.com/image-photo/refreshing-iced-cinnamon-cafe-latte-260nw-2645477683.jpg' 
+      },
+      { 
+        id: 'pan-8', name: '다크초코 카페라떼', nameEn: 'Dark Choco Caffe Latte', price: 1900, category: 'COFFEE ICE', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-9', name: '자바칩 카페라떼', nameEn: 'Javachip Caffe Latte', price: 1900, category: 'COFFEE ICE', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-10', name: '카라멜 마끼아또', nameEn: 'Caramel Macchiato', price: 1800, category: 'COFFEE ICE', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-11', name: '카페모카', nameEn: 'Caffe Mocha', price: 1800, category: 'COFFEE ICE', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-12', name: '티라미수 카페라떼', nameEn: 'Tiramisu Caffe Latte', price: 3300, category: 'COFFEE ICE', isNew: true, options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-13', name: '얼그레이 아메리카노', nameEn: 'Earl Grey Americano', price: 2500, category: 'COFFEE ICE', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-14', name: '말크쉐이크 카페라떼', nameEn: 'Milkshake Caffe Latte', price: 3300, category: 'COFFEE ICE', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-15', name: '피스타치오 카페라떼', nameEn: 'Pistachio Caffe Latte', price: 3300, category: 'COFFEE ICE', isNew: true, options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-16', name: '제주하늘빛 카페라떼', nameEn: 'Jeju Sky Blue Caffe Latte', price: 3300, category: 'COFFEE ICE', isNew: true, options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-17', name: '토피넛 카페라떼', nameEn: 'Toffee Nut Caffe Latte', price: 3300, category: 'COFFEE ICE', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-18', name: '달고나 카페라떼', nameEn: 'Dalgona Caffe Latte', price: 3900, category: 'COFFEE ICE', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      
+      // COFFEE HOT
+      { 
+        id: 'pan-20', name: '아메리카노', nameEn: 'Americano', price: 1200, category: 'COFFEE HOT', isPopular: true, options: { temperature: ['HOT'], extra: [{ name: '샷 추가', price: 300 }] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-21', name: '카페라떼', nameEn: 'Caffe Latte', price: 1700, category: 'COFFEE HOT', options: { temperature: ['HOT'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-22', name: '바닐라 라떼', nameEn: 'Vanilla Latte', price: 1800, category: 'COFFEE HOT', options: { temperature: ['HOT'] }, 
+        imageUrl: '' 
+      },
+      
+      // BEVERAGE
+      { 
+        id: 'pan-30', name: '초코', nameEn: 'Chocolate', price: 1400, category: 'BEVERAGE', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-31', name: '그린티라떼', nameEn: 'Green Tea Latte', price: 1700, category: 'BEVERAGE', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-32', name: '자색고구마 라떼', nameEn: 'Purple Sweet Potato Latte', price: 1900, category: 'BEVERAGE', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-33', name: '쿠키앤크림 라떼', nameEn: 'Cookies and Cream Latte', price: 1700, category: 'BEVERAGE', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-34', name: '민트초코 라떼', nameEn: 'Mint Chocolate Latte', price: 1700, category: 'BEVERAGE', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-35', name: '자바칩초코 라떼', nameEn: 'Javachip Choco Latte', price: 1900, category: 'BEVERAGE', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-36', name: '다크초코 라떼', nameEn: 'Dark Choco Latte', price: 1900, category: 'BEVERAGE', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-37', name: '블루베리라떼', nameEn: 'Blueberry Latte', price: 2800, category: 'BEVERAGE', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-38', name: '티라미수 라떼', nameEn: 'Tiramisu Latte', price: 2800, category: 'BEVERAGE', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-39', name: '타로라떼', nameEn: 'Taro Latte', price: 2800, category: 'BEVERAGE', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-40', name: '벗꽃슈크림 라떼', nameEn: 'Cherry Blossom Cream Latte', price: 2800, category: 'BEVERAGE', isNew: true, options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-41', name: '달고나 라떼', nameEn: 'Dalgona Latte', price: 2500, category: 'BEVERAGE', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-42', name: '말크쉐이크 라떼', nameEn: 'Milkshake Latte', price: 2800, category: 'BEVERAGE', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-43', name: '토피넛 라떼', nameEn: 'Toffee Nut Latte', price: 2800, category: 'BEVERAGE', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-44', name: '바나나 라떼', nameEn: 'Banana Latte', price: 2800, category: 'BEVERAGE', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-45', name: '피스타치오라떼', nameEn: 'Pistachio Latte', price: 2800, category: 'BEVERAGE', isNew: true, options: { temperature: ['HOT'] }, 
+        imageUrl: '' 
+      },
+      
+      // MILK BUBBLETEA
+      { 
+        id: 'pan-50', name: '블랙 버블티', nameEn: 'Black Bubble Tea', price: 2500, category: 'MILK BUBBLETEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-51', name: '곡물 버블티', nameEn: 'Grain Bubble Tea', price: 2500, category: 'MILK BUBBLETEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-52', name: '쿠키앤크림 버블티', nameEn: 'Cookies Cream Bubble Tea', price: 2500, category: 'MILK BUBBLETEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-53', name: '자색고구마 버블티', nameEn: 'Purple Sweet Potato Bubble Tea', price: 2500, category: 'MILK BUBBLETEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-54', name: '망고 버블티', nameEn: 'Mango Bubble Tea', price: 2500, category: 'MILK BUBBLETEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-55', name: '딸기 버블티', nameEn: 'Strawberry Bubble Tea', price: 2500, category: 'MILK BUBBLETEA', isPopular: true, options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-56', name: '얼그레이라떼 버블티', nameEn: 'Earl Grey Latte Bubble Tea', price: 3200, category: 'MILK BUBBLETEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-57', name: '벗꽃슈크림라떼 버블티', nameEn: 'Cherry Blossom Cream Bubble Tea', price: 3200, category: 'MILK BUBBLETEA', isNew: true, options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-58', name: '블루베리라떼 버블티', nameEn: 'Blueberry Latte Bubble Tea', price: 3200, category: 'MILK BUBBLETEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-59', name: '티라미수 버블티', nameEn: 'Tiramisu Bubble Tea', price: 3200, category: 'MILK BUBBLETEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-60', name: '흑당 버블티', nameEn: 'Black Sugar Bubble Tea', price: 3200, category: 'MILK BUBBLETEA', isPopular: true, options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-61', name: '타로라떼 버블티', nameEn: 'Taro Latte Bubble Tea', price: 3200, category: 'MILK BUBBLETEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      
+      // ADE & TEA
+      { 
+        id: 'pan-70', name: '자몽 에이드', nameEn: 'Grapefruit Ade', price: 1500, category: 'ADE & TEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-71', name: '레몬 에이드', nameEn: 'Lemon Ade', price: 1500, category: 'ADE & TEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-72', name: '유자 에이드', nameEn: 'Yuzu Ade', price: 1500, category: 'ADE & TEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-73', name: '청포도 에이드', nameEn: 'Green Grape Ade', price: 2700, category: 'ADE & TEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-74', name: '제주한라봉 에이드', nameEn: 'Jeju Hallabong Ade', price: 2700, category: 'ADE & TEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-75', name: '라임 에이드', nameEn: 'Lime Ade', price: 2700, category: 'ADE & TEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-76', name: '복숭아 아이스티', nameEn: 'Peach Ice Tea', price: 1200, category: 'ADE & TEA', isPopular: true, options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-77', name: '제주청귤 에이드', nameEn: 'Jeju Green Tangerine Ade', price: 2700, category: 'ADE & TEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      
+      // FRUIT TEA
+      { 
+        id: 'pan-80', name: '자몽차', nameEn: 'Grapefruit Tea', price: 1200, category: 'FRUIT TEA', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-81', name: '레몬차', nameEn: 'Lemon Tea', price: 1200, category: 'FRUIT TEA', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-82', name: '유자차', nameEn: 'Yuzu Tea', price: 1200, category: 'FRUIT TEA', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-83', name: '제주청귤차', nameEn: 'Jeju Green Tangerine Tea', price: 2500, category: 'FRUIT TEA', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-84', name: '얼그레이', nameEn: 'Earl Grey', price: 2000, category: 'FRUIT TEA', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-85', name: '피치 망고티', nameEn: 'Peach Mango Tea', price: 2800, category: 'FRUIT TEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-86', name: '루이보스 허브티', nameEn: 'Rooibos Herb Tea', price: 1200, category: 'FRUIT TEA', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-87', name: '히비스커스 애플 블렌딩', nameEn: 'Hibiscus Apple Blending', price: 1400, category: 'FRUIT TEA', options: { temperature: ['ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-88', name: '캐모마일 허브티', nameEn: 'Chamomile Herb Tea', price: 1200, category: 'FRUIT TEA', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+      { 
+        id: 'pan-89', name: '페퍼민트 허브티', nameEn: 'Peppermint Herb Tea', price: 1200, category: 'FRUIT TEA', options: { temperature: ['HOT', 'ICE'] }, 
+        imageUrl: '' 
+      },
+    ],
+  };
+  
+  // ============================================
+  // 카페별 메뉴 가져오기
+  // ============================================
+  export const getMenusByCafeId = (cafeId) => {
+    switch (cafeId) {
+      case 'ajou-cafe-1': // 팬도로시 학생회관점
+        return { ...PANDOROSY_MENUS, cafeName: '팬도로시 학생회관점' };
+      case 'ajou-cafe-2': // 팬도로시 도서관점
+        return { ...PANDOROSY_MENUS, cafeId: 'ajou-cafe-2', cafeName: '팬도로시 도서관점' };
+      case 'ajou-cafe-3': // CAFÉ ING
+        return CAFE_ING_MENUS;
+      case 'ajou-cafe-4': // 다산관 카페 (팬도로시 메뉴)
+        return { ...PANDOROSY_MENUS, cafeId: 'ajou-cafe-4', cafeName: '다산관 카페' };
+      default:
+        return PANDOROSY_MENUS;
+    }
+  };
+  
+  export default { CAFE_ING_MENUS, PANDOROSY_MENUS, getMenusByCafeId };

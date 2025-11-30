@@ -1,14 +1,27 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import Header from '../components/common/Header';
-import MenuDetail from '../components/menu/MenuDetail';
+import React, { useState, useMemo } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { MenuCardSkeleton } from '../components/common/Loading';
+import { getMenusByCafeId } from '../data/menuData';
+
+// 아이콘 컴포넌트들 (변경 없음)
+const ArrowLeftIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="15,18 9,12 15,6" />
+  </svg>
+);
 
 const SearchIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <circle cx="11" cy="11" r="8" />
-    <path d="M21 21l-4.35-4.35" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+
+const CartIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="9" cy="21" r="1" />
+    <circle cx="20" cy="21" r="1" />
+    <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" />
   </svg>
 );
 
@@ -20,498 +33,379 @@ const PlusIcon = () => (
 );
 
 const MinusIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
     <line x1="5" y1="12" x2="19" y2="12" />
   </svg>
 );
 
-const TrashIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <polyline points="3,6 5,6 21,6" />
-    <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6" />
+const XIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
-// 더미 메뉴 데이터
-const DUMMY_MENUS = {
-  'ajou-cafe-1': {
-    cafeName: '아주 카페 본점',
-    categories: [
-      { id: 'coffee', name: '커피' },
-      { id: 'non-coffee', name: '논커피' },
-      { id: 'dessert', name: '디저트' },
-    ],
-    menus: [
-      {
-        id: 'menu-1',
-        name: '아메리카노',
-        price: 2500,
-        description: '깊고 진한 에스프레소의 풍미',
-        imageUrl: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=400',
-        category: '커피',
-        isPopular: true,
-        isSoldOut: false,
-        options: [
-          {
-            id: 'temp',
-            name: '온도',
-            required: true,
-            multiple: false,
-            items: [
-              { id: 'hot', name: 'HOT', price: 0 },
-              { id: 'ice', name: 'ICE', price: 0 },
-            ],
-          },
-          {
-            id: 'size',
-            name: '사이즈',
-            required: true,
-            multiple: false,
-            items: [
-              { id: 'regular', name: 'Regular', price: 0 },
-              { id: 'large', name: 'Large', price: 500 },
-            ],
-          },
-          {
-            id: 'shot',
-            name: '샷 추가',
-            required: false,
-            multiple: true,
-            items: [
-              { id: 'extra-shot', name: '샷 추가', price: 500 },
-              { id: 'decaf', name: '디카페인 변경', price: 500 },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'menu-2',
-        name: '카페라떼',
-        price: 3500,
-        description: '부드러운 우유와 에스프레소의 조화',
-        imageUrl: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=400',
-        category: '커피',
-        isPopular: true,
-        isSoldOut: false,
-        options: [
-          {
-            id: 'temp',
-            name: '온도',
-            required: true,
-            multiple: false,
-            items: [
-              { id: 'hot', name: 'HOT', price: 0 },
-              { id: 'ice', name: 'ICE', price: 0 },
-            ],
-          },
-          {
-            id: 'size',
-            name: '사이즈',
-            required: true,
-            multiple: false,
-            items: [
-              { id: 'regular', name: 'Regular', price: 0 },
-              { id: 'large', name: 'Large', price: 500 },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'menu-3',
-        name: '바닐라라떼',
-        price: 4000,
-        description: '달콤한 바닐라 시럽이 들어간 라떼',
-        imageUrl: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=400',
-        category: '커피',
-        isNew: true,
-        isSoldOut: false,
-        options: [
-          {
-            id: 'temp',
-            name: '온도',
-            required: true,
-            multiple: false,
-            items: [
-              { id: 'hot', name: 'HOT', price: 0 },
-              { id: 'ice', name: 'ICE', price: 0 },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'menu-4',
-        name: '녹차라떼',
-        price: 4000,
-        description: '진한 녹차와 부드러운 우유',
-        imageUrl: 'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?w=400',
-        category: '논커피',
-        isPopular: false,
-        isSoldOut: false,
-        options: [
-          {
-            id: 'temp',
-            name: '온도',
-            required: true,
-            multiple: false,
-            items: [
-              { id: 'hot', name: 'HOT', price: 0 },
-              { id: 'ice', name: 'ICE', price: 0 },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'menu-5',
-        name: '초코라떼',
-        price: 4000,
-        description: '달콤한 초콜릿과 우유의 만남',
-        imageUrl: 'https://images.unsplash.com/photo-1542990253-0d0f5be5f0ed?w=400',
-        category: '논커피',
-        isPopular: false,
-        isSoldOut: false,
-        options: [],
-      },
-      {
-        id: 'menu-6',
-        name: '티라미수 케이크',
-        price: 5500,
-        description: '진한 에스프레소와 마스카포네 치즈',
-        imageUrl: 'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?w=400',
-        category: '디저트',
-        isPopular: true,
-        isSoldOut: false,
-        options: [],
-      },
-      {
-        id: 'menu-7',
-        name: '크로아상',
-        price: 3500,
-        description: '바삭하고 버터향 가득한 크로아상',
-        imageUrl: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400',
-        category: '디저트',
-        isPopular: false,
-        isSoldOut: true,
-        options: [],
-      },
-      {
-        id: 'menu-8',
-        name: '마카롱 세트',
-        price: 6000,
-        description: '다양한 맛의 마카롱 4개 세트',
-        imageUrl: 'https://images.unsplash.com/photo-1569864358642-9d1684040f43?w=400',
-        category: '디저트',
-        isNew: true,
-        isSoldOut: false,
-        options: [],
-      },
-    ],
-  },
-};
-
-// 다른 카페도 같은 메뉴 사용 (데모용)
-DUMMY_MENUS['ajou-cafe-2'] = { ...DUMMY_MENUS['ajou-cafe-1'], cafeName: '팔달관 카페' };
-DUMMY_MENUS['ajou-cafe-3'] = { ...DUMMY_MENUS['ajou-cafe-1'], cafeName: '중앙도서관 카페' };
-DUMMY_MENUS['ajou-cafe-4'] = { ...DUMMY_MENUS['ajou-cafe-1'], cafeName: '학생회관 카페' };
-
 const MenuPage = () => {
-  const { cafeId } = useParams();
   const navigate = useNavigate();
-  const { items, totalItems, totalPrice, addItem, updateQuantity, removeItem } = useCart();
+  const { cafeId } = useParams();
   
-  const [loading, setLoading] = useState(true);
-  const [cafeData, setCafeData] = useState(null);
-  const [selectedMenu, setSelectedMenu] = useState(null);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  // 수정된 부분: Context에서 가져오는 변수명 변경
+  // items: 장바구니 목록, addItem: 추가 함수, totalItems: 총 개수 (함수가 아닌 값)
+  const { items: cartItems, addItem, totalItems } = useCart();
+  
+  // 카페별 메뉴 데이터 가져오기
+  const cafeData = useMemo(() => getMenusByCafeId(cafeId), [cafeId]);
+  const { cafeName, categories, menus } = cafeData;
+  
+  const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedMenu, setSelectedMenu] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [selectedOptions, setSelectedOptions] = useState({});
   
-  // 메뉴 데이터 로드
-  useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setCafeData(DUMMY_MENUS[cafeId] || DUMMY_MENUS['ajou-cafe-1']);
-      setLoading(false);
-    }, 500);
-  }, [cafeId]);
+  const allCategories = ['전체', ...categories];
   
-  // 필터링된 메뉴
   const filteredMenus = useMemo(() => {
-    if (!cafeData) return [];
-    return cafeData.menus.filter((menu) => {
-      const matchesSearch = searchQuery === '' || 
-        menu.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (menu.description && menu.description.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchesCategory = selectedCategory === 'all' || menu.category === selectedCategory;
-      return matchesSearch && matchesCategory;
+    return menus.filter(menu => {
+      const matchesCategory = selectedCategory === '전체' || menu.category === selectedCategory;
+      const matchesSearch = menu.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           (menu.nameEn && menu.nameEn.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesCategory && matchesSearch;
     });
-  }, [cafeData, searchQuery, selectedCategory]);
+  }, [menus, selectedCategory, searchQuery]);
   
-  // 카테고리별 그룹화
-  const groupedMenus = useMemo(() => {
-    if (selectedCategory !== 'all') {
-      return { [selectedCategory]: filteredMenus };
-    }
-    return filteredMenus.reduce((acc, menu) => {
-      const category = menu.category || '기타';
-      if (!acc[category]) acc[category] = [];
-      acc[category].push(menu);
-      return acc;
-    }, {});
-  }, [filteredMenus, selectedCategory]);
-  
-  const formatPrice = (price) => new Intl.NumberFormat('ko-KR').format(price);
-  
-  const handleMenuClick = (menu) => {
+  const handleSelectMenu = (menu) => {
     setSelectedMenu(menu);
-    setIsDetailOpen(true);
+    setQuantity(1);
+    const initialOptions = {};
+    if (menu.options?.temperature) {
+      initialOptions.temperature = menu.options.temperature[0];
+    }
+    if (menu.options?.size) {
+      initialOptions.size = menu.options.size[0];
+    }
+    setSelectedOptions(initialOptions);
   };
   
-  const handleQuickAdd = (menu) => {
-    if (!menu.options || menu.options.length === 0) {
-      addItem({
-        id: menu.id,
-        name: menu.name,
-        price: menu.price,
-        imageUrl: menu.imageUrl,
-        options: {},
-        cafeId,
-        cafeName: cafeData?.cafeName,
+  const calculateOptionPrice = () => {
+    let extraPrice = 0;
+    if (selectedOptions.size?.price) {
+      extraPrice += selectedOptions.size.price;
+    }
+    if (selectedOptions.extra) {
+      selectedOptions.extra.forEach(e => {
+        extraPrice += e.price;
+      });
+    }
+    return extraPrice;
+  };
+  
+  // 장바구니 추가 핸들러
+  const handleAddToCart = () => {
+    if (!selectedMenu) return;
+    
+    // 기본 가격 + 옵션 가격
+    const unitPrice = selectedMenu.price + calculateOptionPrice();
+    
+    // Context에 넘길 아이템 객체 생성
+    const cartItem = {
+      id: selectedMenu.id, // 유니크 ID는 리듀서나 렌더링 시 처리해도 됨, 여기서는 메뉴 ID 사용
+      name: selectedMenu.name,
+      price: unitPrice,    // 옵션 포함 단가
+      quantity: quantity,  // 선택된 수량
+      options: selectedOptions,
+      cafeId,
+      cafeName,
+      imageUrl: selectedMenu.imageUrl,
+    };
+    
+    addItem(cartItem); // Context의 함수 호출
+    setSelectedMenu(null); // 모달 닫기
+  };
+  
+  const toggleExtraOption = (extra) => {
+    const currentExtras = selectedOptions.extra || [];
+    const exists = currentExtras.find(e => e.name === extra.name);
+    
+    if (exists) {
+      setSelectedOptions({
+        ...selectedOptions,
+        extra: currentExtras.filter(e => e.name !== extra.name),
       });
     } else {
-      handleMenuClick(menu);
+      setSelectedOptions({
+        ...selectedOptions,
+        extra: [...currentExtras, extra],
+      });
     }
   };
-  
-  const handleAddToCart = (item) => addItem(item);
-  
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header title="메뉴" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {[1,2,3,4,5,6,7,8].map(i => <MenuCardSkeleton key={i} />)}
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header title={cafeData?.cafeName || '메뉴'} />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="lg:flex lg:gap-8">
-          {/* 메인 콘텐츠 */}
-          <div className="flex-1">
-            {/* 검색 & 필터 */}
-            <div className="sticky top-[57px] z-40 bg-gray-50 py-4 -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-              <div className="flex flex-col sm:flex-row gap-4">
-                {/* 검색바 */}
-                <div className="relative flex-1">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                    <SearchIcon />
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="메뉴 검색..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="input-field pl-12 w-full"
-                  />
-                </div>
-                
-                {/* 카테고리 탭 */}
-                <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
-                  <button
-                    onClick={() => setSelectedCategory('all')}
-                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all
-                      ${selectedCategory === 'all' ? 'bg-ajou-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
-                  >
-                    전체
-                  </button>
-                  {cafeData?.categories.map((category) => (
-                    <button
-                      key={category.id}
-                      onClick={() => setSelectedCategory(category.name)}
-                      className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all
-                        ${selectedCategory === category.name ? 'bg-ajou-primary text-white' : 'bg-white text-gray-600 hover:bg-gray-100'}`}
-                    >
-                      {category.name}
-                    </button>
-                  ))}
-                </div>
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate('/')}
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                <ArrowLeftIcon />
+              </button>
+              <div>
+                <h1 className="text-lg font-bold text-gray-900">{cafeName}</h1>
+                <p className="text-sm text-gray-500">메뉴 선택</p>
               </div>
             </div>
             
-            {/* 메뉴 그리드 */}
-            {Object.keys(groupedMenus).length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500">검색 결과가 없습니다</p>
-              </div>
-            ) : (
-              Object.entries(groupedMenus).map(([category, categoryMenus]) => (
-                <div key={category} className="mb-8">
-                  {selectedCategory === 'all' && (
-                    <h2 className="text-lg font-bold text-gray-900 mb-4">{category}</h2>
-                  )}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {categoryMenus.map((menu, index) => (
-                      <div
-                        key={menu.id}
-                        onClick={() => !menu.isSoldOut && handleMenuClick(menu)}
-                        className={`bg-white rounded-2xl shadow-card overflow-hidden cursor-pointer
-                          hover:shadow-card-hover transition-all duration-300 animate-slide-up
-                          ${menu.isSoldOut ? 'opacity-60 cursor-not-allowed' : ''}`}
-                        style={{ animationDelay: `${index * 0.05}s` }}
-                      >
-                        {/* 이미지 */}
-                        <div className="relative h-40">
-                          <img
-                            src={menu.imageUrl || '/images/default-menu.png'}
-                            alt={menu.name}
-                            className="w-full h-full object-cover"
-                          />
-                          {menu.isSoldOut && (
-                            <div className="absolute inset-0 bg-gray-900/60 flex items-center justify-center">
-                              <span className="text-white font-bold">품절</span>
-                            </div>
-                          )}
-                          <div className="absolute top-2 left-2 flex gap-1">
-                            {menu.isPopular && <span className="badge-accent text-xs">인기</span>}
-                            {menu.isNew && <span className="badge-primary text-xs">NEW</span>}
-                          </div>
-                        </div>
-                        
-                        {/* 정보 */}
-                        <div className="p-4">
-                          <h3 className="font-semibold text-gray-900">{menu.name}</h3>
-                          {menu.description && (
-                            <p className="text-sm text-gray-500 mt-1 line-clamp-2">{menu.description}</p>
-                          )}
-                          <div className="flex items-center justify-between mt-3">
-                            <span className="font-bold text-ajou-primary">{formatPrice(menu.price)}원</span>
-                            {!menu.isSoldOut && (
-                              <button
-                                onClick={(e) => { e.stopPropagation(); handleQuickAdd(menu); }}
-                                className="w-8 h-8 bg-ajou-primary text-white rounded-full flex items-center justify-center
-                                  hover:bg-ajou-dark transition-colors active:scale-90"
-                              >
-                                <PlusIcon />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))
-            )}
+            {/* 장바구니 버튼 수정됨: getTotalItems() 함수 호출 -> totalItems 변수 사용 */}
+            <button
+              onClick={() => navigate('/cart')}
+              className="relative p-2 hover:bg-gray-100 rounded-xl transition-colors"
+            >
+              <CartIcon />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-ajou-accent text-white text-xs font-bold rounded-full flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </button>
           </div>
           
-          {/* 사이드 장바구니 (데스크탑) */}
-          <div className="hidden lg:block w-80 flex-shrink-0">
-            <div className="sticky top-24 bg-white rounded-2xl shadow-card p-6">
-              <h3 className="font-bold text-lg text-gray-900 mb-4">
-                장바구니 ({totalItems})
-              </h3>
-              
-              {items.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-400 text-sm">장바구니가 비어있습니다</p>
-                </div>
-              ) : (
-                <>
-                  <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                    {items.map((item, index) => (
-                      <div key={`${item.id}-${index}`} className="flex gap-3 p-3 bg-gray-50 rounded-xl">
-                        <img
-                          src={item.imageUrl}
-                          alt={item.name}
-                          className="w-14 h-14 rounded-lg object-cover"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900 text-sm truncate">{item.name}</p>
-                          <p className="text-ajou-primary font-semibold text-sm mt-1">
-                            {formatPrice(item.price * item.quantity)}원
-                          </p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <button
-                              onClick={() => updateQuantity(item.id, item.options, item.quantity - 1)}
-                              className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm"
-                            >
-                              <MinusIcon />
-                            </button>
-                            <span className="text-sm font-medium w-4 text-center">{item.quantity}</span>
-                            <button
-                              onClick={() => updateQuantity(item.id, item.options, item.quantity + 1)}
-                              className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm"
-                            >
-                              <PlusIcon />
-                            </button>
-                            <button
-                              onClick={() => removeItem(item.id, item.options)}
-                              className="ml-auto w-6 h-6 text-gray-400 hover:text-red-500"
-                            >
-                              <TrashIcon />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <div className="border-t border-gray-100 mt-4 pt-4">
-                    <div className="flex justify-between mb-4">
-                      <span className="text-gray-600">총 금액</span>
-                      <span className="text-xl font-bold text-ajou-primary">
-                        {formatPrice(totalPrice)}원
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => navigate('/cart')}
-                      className="btn-primary w-full"
-                    >
-                      주문하기
-                    </button>
-                  </div>
-                </>
-              )}
+          <div className="pb-4">
+            <div className="relative">
+              <SearchIcon />
+              <input
+                type="text"
+                placeholder="메뉴 검색..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-ajou-primary/20"
+                style={{ paddingLeft: '40px' }}
+              />
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                <SearchIcon />
+              </div>
             </div>
           </div>
+          
+          <div className="flex gap-2 pb-4 overflow-x-auto scrollbar-hide">
+            {allCategories.map(category => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`
+                  px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all
+                  ${selectedCategory === category 
+                    ? 'bg-ajou-primary text-white' 
+                    : 'bg-white text-gray-600 border border-gray-200 hover:border-ajou-primary/50'}
+                `}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      </header>
       
-      {/* 모바일 플로팅 장바구니 버튼 */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {filteredMenus.map(menu => (
+            <div
+              key={menu.id}
+              onClick={() => handleSelectMenu(menu)}
+              className="bg-white rounded-3xl overflow-hidden cursor-pointer hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
+              style={{ boxShadow: '0 2px 12px rgba(31, 47, 152, 0.06)' }}
+            >
+              <div className="relative aspect-square">
+                <img
+                  src={menu.imageUrl}
+                  alt={menu.name}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-2 left-2 flex gap-1">
+                  {menu.isPopular && (
+                    <span className="px-2 py-0.5 bg-ajou-accent text-white text-xs font-bold rounded-full">
+                      인기
+                    </span>
+                  )}
+                  {menu.isNew && (
+                    <span className="px-2 py-0.5 bg-ajou-primary text-white text-xs font-bold rounded-full">
+                      NEW
+                    </span>
+                  )}
+                </div>
+              </div>
+              
+              <div className="p-3">
+                <h3 className="font-semibold text-gray-900 text-sm truncate">{menu.name}</h3>
+                {menu.nameEn && (
+                  <p className="text-xs text-gray-400 truncate mt-0.5">{menu.nameEn}</p>
+                )}
+                <p className="text-ajou-primary font-bold mt-2">
+                  {menu.price.toLocaleString()}원
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {filteredMenus.length === 0 && (
+          <div className="text-center py-16">
+            <p className="text-4xl mb-4">🔍</p>
+            <p className="text-gray-500">검색 결과가 없습니다</p>
+          </div>
+        )}
+      </main>
+      
+      {/* 플로팅 장바구니 버튼 (모바일) 수정됨 */}
       {totalItems > 0 && (
-        <div className="lg:hidden fixed bottom-6 left-4 right-4 z-50">
+        <div className="lg:hidden fixed bottom-6 left-4 right-4">
           <button
             onClick={() => navigate('/cart')}
-            className="w-full bg-ajou-primary text-white rounded-2xl p-4 shadow-modal
-              flex items-center justify-between hover:bg-ajou-dark transition-colors"
+            className="w-full py-4 bg-ajou-primary text-white rounded-2xl font-medium flex items-center justify-center gap-2 shadow-lg"
           >
-            <div className="flex items-center gap-3">
-              <span className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center font-bold">
-                {totalItems}
-              </span>
-              <span className="font-semibold">장바구니 보기</span>
-            </div>
-            <span className="font-bold">{formatPrice(totalPrice)}원</span>
+            <CartIcon />
+            장바구니 보기 ({totalItems})
           </button>
         </div>
       )}
       
-      {/* 메뉴 상세 모달 */}
-      <MenuDetail
-        isOpen={isDetailOpen}
-        onClose={() => setIsDetailOpen(false)}
-        menu={selectedMenu}
-        onAddToCart={handleAddToCart}
-        cafeId={cafeId}
-        cafeName={cafeData?.cafeName}
-      />
+      {selectedMenu && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center">
+          <div className="bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl max-h-[90vh] overflow-auto animate-slide-up">
+            <div className="relative aspect-video">
+              <img
+                src={selectedMenu.imageUrl}
+                alt={selectedMenu.name}
+                className="w-full h-full object-cover"
+              />
+              <button
+                onClick={() => setSelectedMenu(null)}
+                className="absolute top-4 right-4 w-10 h-10 bg-black/50 text-white rounded-full flex items-center justify-center"
+              >
+                <XIcon />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-gray-900">{selectedMenu.name}</h2>
+              {selectedMenu.nameEn && (
+                <p className="text-sm text-gray-500 mt-1">{selectedMenu.nameEn}</p>
+              )}
+              <p className="text-2xl font-bold text-ajou-primary mt-2">
+                {selectedMenu.price.toLocaleString()}원
+              </p>
+              
+              {selectedMenu.options?.temperature && (
+                <div className="mt-6">
+                  <p className="text-sm font-medium text-gray-700 mb-2">온도 선택</p>
+                  <div className="flex gap-2">
+                    {selectedMenu.options.temperature.map(temp => (
+                      <button
+                        key={temp}
+                        onClick={() => setSelectedOptions({ ...selectedOptions, temperature: temp })}
+                        className={`
+                          flex-1 py-3 rounded-xl font-medium text-sm transition-all
+                          ${selectedOptions.temperature === temp 
+                            ? 'bg-ajou-primary text-white' 
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                        `}
+                      >
+                        {temp}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {selectedMenu.options?.size && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-gray-700 mb-2">사이즈 선택</p>
+                  <div className="flex gap-2">
+                    {selectedMenu.options.size.map(size => (
+                      <button
+                        key={size.name}
+                        onClick={() => setSelectedOptions({ ...selectedOptions, size })}
+                        className={`
+                          flex-1 py-3 rounded-xl font-medium text-sm transition-all
+                          ${selectedOptions.size?.name === size.name 
+                            ? 'bg-ajou-primary text-white' 
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                        `}
+                      >
+                        {size.name}
+                        {size.price > 0 && (
+                          <span className="ml-1 text-xs opacity-80">+{size.price}원</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {selectedMenu.options?.extra && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-gray-700 mb-2">추가 옵션</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedMenu.options.extra.map(extra => {
+                      const isSelected = selectedOptions.extra?.find(e => e.name === extra.name);
+                      return (
+                        <button
+                          key={extra.name}
+                          onClick={() => toggleExtraOption(extra)}
+                          className={`
+                            px-4 py-2 rounded-xl font-medium text-sm transition-all
+                            ${isSelected 
+                              ? 'bg-ajou-accent text-white' 
+                              : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
+                          `}
+                        >
+                          {extra.name} +{extra.price}원
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              
+              <div className="mt-6">
+                <p className="text-sm font-medium text-gray-700 mb-2">수량</p>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors"
+                  >
+                    <MinusIcon />
+                  </button>
+                  <span className="text-xl font-bold w-8 text-center">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center hover:bg-gray-200 transition-colors"
+                  >
+                    <PlusIcon />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="mt-6 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-gray-500">총 금액</span>
+                  <span className="text-2xl font-bold text-ajou-primary">
+                    {((selectedMenu.price + calculateOptionPrice()) * quantity).toLocaleString()}원
+                  </span>
+                </div>
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full py-4 bg-ajou-primary text-white rounded-2xl font-medium text-lg hover:bg-ajou-dark transition-colors"
+                >
+                  장바구니 담기
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
