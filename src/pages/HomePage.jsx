@@ -189,25 +189,32 @@ const HomePage = () => {
                       <div className="flex-1 p-4 flex flex-col justify-center">
                         <div>
                           {cafe.isOpen && (
-                            <span className="inline-block px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full mb-2">
+                            <span className="inline-block px-2 py-0.5 bg-green-100 text-green-700 text-[10px] sm:text-xs font-medium rounded-full mb-2">
                               영업중
                             </span>
                           )}
-                          <h3 className="font-bold text-gray-900">{cafe.name}</h3>
-                          <p className="text-sm text-gray-500 mt-0.5">{cafe.location}</p>
+
+                          <h3 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg">
+                            {cafe.name}
+                          </h3>
+
+                          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+                            {cafe.location}
+                          </p>
                         </div>
-                        
+
                         <div className="flex items-center gap-3 mt-3">
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500">
                             <ClockIcon />
                             <span>{cafe.waitTime}</span>
                           </div>
-                          <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500">
                             <StarIcon />
                             <span>{cafe.rating}</span>
                           </div>
                         </div>
                       </div>
+
                     </div>
                   </div>
                 ))}
