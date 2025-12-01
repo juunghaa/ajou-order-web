@@ -221,7 +221,7 @@ const MenuPage = () => {
                 <img
                   src={menu.imageUrl}
                   alt={menu.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain p-4"
                 />
                 <div className="absolute top-2 left-2 flex gap-1">
                   {menu.isPopular && (
@@ -278,7 +278,7 @@ const MenuPage = () => {
               <img
                 src={selectedMenu.imageUrl}
                 alt={selectedMenu.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
               <button
                 onClick={() => setSelectedMenu(null)}

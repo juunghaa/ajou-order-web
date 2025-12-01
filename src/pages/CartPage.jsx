@@ -105,7 +105,7 @@ const CartPage = () => {
                     <img
                       src={item.imageUrl || '/images/default-menu.png'}
                       alt={item.name}
-                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover"
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-contain"
                     />
                     
                     <div className="flex-1 min-w-0">

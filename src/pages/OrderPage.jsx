@@ -101,7 +101,7 @@ const OrderPage = () => {
                       <img
                         src={item.imageUrl}
                         alt={item.name}
-                        className="w-12 h-12 rounded-lg object-cover"
+                        className="w-12 h-12 rounded-lg object-contain"
                       />
                       <div>
                         <span className="text-gray-700">{item.name}</span>

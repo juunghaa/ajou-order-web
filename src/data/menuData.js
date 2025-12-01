@@ -11,77 +11,77 @@ export const CAFE_ING_MENUS = {
       // Signature
       { 
         id: 'ing-1', name: '바닐라빈 푸딩 슈크림 라떼', nameEn: 'Vanillabean Puding Custardcream Latte', price: 3900, category: 'Signature', isNew: true, options: { temperature: ['ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649232045-IHAWD.png' 
       },
       { 
         id: 'ing-2', name: '코코초코 푸딩 라떼', nameEn: 'Cocochoco Puding Latte', price: 3900, category: 'Signature', isNew: true, options: { temperature: ['ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649232109-OPIKZ.png' 
       },
       { 
         id: 'ing-3', name: '바닐라빈 푸딩 슈크림 프라페', nameEn: 'Vanillabean Puding Custardcream Frappe', price: 4400, category: 'Signature', options: { temperature: ['ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649231903-JZUPR.png' 
       },
       { 
         id: 'ing-4', name: '코코초코 푸딩 프라페', nameEn: 'Cocochoco Puding Frappe', price: 4400, category: 'Signature', options: { temperature: ['ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649232160-JLNPP.png' 
       },
       
       // Coffee
       { 
         id: 'ing-5', name: 'ING VENTI 아메리카노', nameEn: 'ING Venti Americano', price: 1500, category: 'Coffee', isPopular: true, options: { temperature: ['HOT', 'ICE'], size: [{ name: 'Regular', price: 0 }, { name: 'Venti', price: 500 }], extra: [{ name: '샷 추가', price: 500 }] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649255859-CYMXZ.png' 
       },
       { 
         id: 'ing-6', name: '디카페인 아메리카노', nameEn: 'Decaffeine Americano', price: 2500, category: 'Coffee', isNew: true, options: { temperature: ['HOT', 'ICE'], size: [{ name: 'Regular', price: 0 }, { name: 'Large', price: 500 }] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649255859-CYMXZ.png' 
       },
       { 
         id: 'ing-7', name: '카페라떼', nameEn: 'Caffe Latte', price: 2700, category: 'Coffee', options: { temperature: ['HOT', 'ICE'], extra: [{ name: '샷 추가', price: 500 }] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649256214-AXKLI.png' 
       },
       { 
         id: 'ing-8', name: '카푸치노', nameEn: 'Cappuccino', price: 2700, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649253210-HNVIN.png' 
       },
       { 
         id: 'ing-9', name: '헤이즐넛', nameEn: 'Hazelnut', price: 2500, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649325209-MGZMO.png' 
       },
       { 
         id: 'ing-10', name: '카라멜 마끼아또', nameEn: 'Caramel Macchiato', price: 3500, category: 'Coffee', isPopular: true, options: { temperature: ['HOT', 'ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649256527-CRBKK.png' 
       },
       { 
         id: 'ing-11', name: '연유라떼', nameEn: 'Condensed Milk Latte', price: 3700, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649256580-BXEZA.png' 
       },
       { 
         id: 'ing-12', name: '흑당라떼', nameEn: 'Black Sugar Latte', price: 3700, category: 'Coffee', options: { temperature: ['ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649256684-WKBBD.png' 
       },
       { 
         id: 'ing-13', name: '아인슈페너', nameEn: 'Einspanner', price: 3300, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649256742-YLQYN.png' 
       },
       { 
         id: 'ing-14', name: '아인슈페너 라떼', nameEn: 'Einspanner Latte', price: 3800, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649256782-QRRKC.png' 
       },
       { 
         id: 'ing-15', name: '콜드브루', nameEn: 'Cold Brew', price: 3300, category: 'Coffee', options: { temperature: ['ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649230861-RCGLT.png' 
       },
       { 
         id: 'ing-16', name: '콜드브루 라떼', nameEn: 'Cold Brew Latte', price: 3800, category: 'Coffee', options: { temperature: ['ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649230947-DLNEB.png' 
       },
       { 
         id: 'ing-17', name: '카페라떼 바닐라/헤이즐넛', nameEn: 'Caffe Latte Vanilla/Hazelnut', price: 3200, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649256314-JGTES.png' 
       },
       { 
         id: 'ing-18', name: '카페모카 다크', nameEn: 'Caffe Mocha Dark', price: 3700, category: 'Coffee', options: { temperature: ['HOT', 'ICE'] }, 
-        imageUrl: '' 
+        imageUrl: 'http://www.cafeing.kr/upload_file/goods/1649256463-HEOYT.png' 
       },
     ],
   };

@@ -26,15 +26,18 @@ const MenuCard = ({
     >
       {/* 이미지 */}
       <div className="relative w-24 h-24 flex-shrink-0">
-        <img
-          src={imageUrl || '/images/default-menu.png'}
-          alt={name}
-          className="w-full h-full object-cover rounded-xl"
-          onError={(e) => {
-            e.target.src = '/images/default-menu.png';
-          }}
-        />
-        
+        <div className="w-full h-full bg-white rounded-2xl border border-gray-100 flex items-center justify-center overflow-hidden">
+          <img
+            src={imageUrl || '/images/default-menu.png'}
+            alt={name}
+            className="max-w-[70%] max-h-[70%] object-contain"
+            loading="lazy"
+            onError={(e) => {
+              e.target.src = '/images/default-menu.png';
+            }}
+          />
+      </div>
+
         {/* 품절 오버레이 */}
         {isSoldOut && (
           <div className="absolute inset-0 bg-gray-900/60 rounded-xl flex items-center justify-center">
