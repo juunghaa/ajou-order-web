@@ -56,6 +56,9 @@ const OrderPage = () => {
       
       const orderData = {
         orderId: `AO${Date.now()}`,
+        orderNumber: Math.floor(Math.random() * 100) + 1, 
+        waitingNumber: Math.floor(Math.random() * 5) + 1,  
+        cafeName: cafe?.name,  
         items,
         cafe,
         totalPrice,
@@ -68,7 +71,9 @@ const OrderPage = () => {
       
       localStorage.setItem('ajouorder_last_order', JSON.stringify(orderData));
       clearCart();
-      navigate('/order/complete');
+
+      navigate('/order/complete', { state: orderData });
+
     } catch (error) {
       console.error('주문 실패:', error);
       alert('주문 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
