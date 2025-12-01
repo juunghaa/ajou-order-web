@@ -70,7 +70,7 @@ const OrderPage = () => {
       };
       
       localStorage.setItem('ajouorder_last_order', JSON.stringify(orderData));
-      clearCart();
+      // clearCart();
 
       navigate('/order/complete', { state: orderData });
 
