@@ -76,7 +76,7 @@ const OrderPage = () => {
       
       if (error) throw error;
       
-      clearCart();
+      // clearCart();
       
       navigate('/order/complete', { 
         state: {
