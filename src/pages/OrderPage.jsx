@@ -3,6 +3,56 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../components/common/Header';
 import Button from '../components/common/Button';
 import { useCart } from '../context/CartContext';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
+
+// 컴포넌트 안에서
+const { user } = useAuth();
+
+const handleOrder = async () => {
+  setLoading(true);
+  
+  try {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // ✅ Supabase에 저장
+    const { data, error } = await supabase
+      .from('orders')
+      .insert({
+        user_id: user?.id || null,
+        cafe_id: cafe?.id,
+        cafe_name: cafe?.name,
+        items: items,
+        total_price: totalPrice,
+        status: 'pending',
+        note: orderNote,
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    clearCart();
+    
+    navigate('/order/complete', { 
+      state: {
+        orderId: data.id,
+        orderNumber: data.order_number,
+        waitingNumber: Math.floor(Math.random() * 5) + 1,
+        cafeName: cafe?.name,
+        items,
+        totalPrice,
+        estimatedTime: '10-15분',
+      }
+    });
+
+  } catch (error) {
+    console.error('주문 실패:', error);
+    alert('주문 처리 중 오류가 발생했습니다.');
+  } finally {
+    setLoading(false);
+  }
+};
 
 const CreditCardIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

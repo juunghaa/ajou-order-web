@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';  // ✅ 추가
 
 const CoffeeIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -28,6 +29,28 @@ const SendIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <line x1="22" y1="2" x2="11" y2="13" />
     <polygon points="22,2 15,22 11,13 2,9" />
+  </svg>
+);
+
+const UserIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+);
+
+const LogoutIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+    <polyline points="16,17 21,12 16,7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
+);
+
+const HistoryIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12,6 12,12 16,14" />
   </svg>
 );
 
@@ -91,10 +114,36 @@ const NOTICES = [
 
 const HomePage = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();  // ✅ 추가
+  
   const [activeTab, setActiveTab] = useState('notice');
   const [feedbackText, setFeedbackText] = useState('');
   const [recommendText, setRecommendText] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);  // ✅ 추가
+  
+  const profileMenuRef = useRef(null);  // ✅ 추가
+  
+  // 프로필 메뉴 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  
+  // 로그아웃 처리
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setShowProfileMenu(false);
+    } catch (error) {
+      console.error('로그아웃 실패:', error);
+    }
+  };
   
   const handleSubmitFeedback = () => {
     if (!feedbackText.trim()) return;
@@ -110,6 +159,18 @@ const HomePage = () => {
     setRecommendText('');
     setSubmitSuccess(true);
     setTimeout(() => setSubmitSuccess(false), 2000);
+  };
+  
+  // 사용자 이름 가져오기
+  const getUserDisplayName = () => {
+    if (!user) return '';
+    return user.user_metadata?.display_name || user.email?.split('@')[0] || '사용자';
+  };
+  
+  // 사용자 이니셜 가져오기
+  const getUserInitial = () => {
+    const name = getUserDisplayName();
+    return name.charAt(0).toUpperCase();
   };
   
   return (
@@ -134,16 +195,88 @@ const HomePage = () => {
               >
                 관리자
               </button>
-              <span className="text-sm text-gray-500">아주대학교</span>
-              <div className="w-8 h-8 bg-ajou-light rounded-full flex items-center justify-center">
+              <span className="text-sm text-gray-500 hidden sm:block">아주대학교</span>
+              {/* <div className="w-8 h-8 bg-ajou-light rounded-full flex items-center justify-center">
                 <span className="text-ajou-primary text-sm font-medium">👤</span>
-              </div>
+              </div> */}
+              {/* ✅ 프로필 영역 수정 */}
+              {user ? (
+                // 로그인 상태
+                <div className="relative" ref={profileMenuRef}>
+                  <button
+                    onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    className="flex items-center gap-2 p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="w-8 h-8 bg-ajou-primary rounded-full flex items-center justify-center">
+                      <span className="text-white text-sm font-bold">{getUserInitial()}</span>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700 hidden sm:block">
+                      {getUserDisplayName()}
+                    </span>
+                  </button>
+                  
+                  {/* 프로필 드롭다운 메뉴 */}
+                  {showProfileMenu && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-gray-100 py-2 z-50">
+                      {/* 사용자 정보 */}
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="font-semibold text-gray-900">{getUserDisplayName()}</p>
+                        <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                      </div>
+                      
+                      {/* 메뉴 항목 */}
+                      <div className="py-1">
+                        <button
+                          onClick={() => {
+                            navigate('/orders');
+                            setShowProfileMenu(false);
+                          }}
+                          className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                        >
+                          <HistoryIcon />
+                          주문 내역
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigate('/profile');
+                            setShowProfileMenu(false);
+                          }}
+                          className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3"
+                        >
+                          <UserIcon />
+                          프로필 설정
+                        </button>
+                      </div>
+                      
+                      {/* 로그아웃 */}
+                      <div className="border-t border-gray-100 pt-1">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3"
+                        >
+                          <LogoutIcon />
+                          로그아웃
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // 비로그인 상태
+                <button
+                  onClick={() => navigate('/login')}
+                  className="flex items-center gap-2 px-4 py-2 bg-ajou-primary text-white text-sm font-medium rounded-xl hover:bg-ajou-dark transition-colors"
+                >
+                  <UserIcon />
+                  <span className="hidden sm:block">로그인</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
       </header>
       
-      {/* 메인 컨텐츠 */}
+      {/* 메인 컨텐츠 - 기존과 동일 */}
       <main className="flex-1 overflow-hidden">
         <div className="h-full max-w-7xl mx-auto px-6 lg:px-8 py-6">
           <div className="h-full flex gap-6">
@@ -193,16 +326,13 @@ const HomePage = () => {
                               영업중
                             </span>
                           )}
-
                           <h3 className="font-bold text-gray-900 text-sm sm:text-base md:text-lg">
                             {cafe.name}
                           </h3>
-
                           <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
                             {cafe.location}
                           </p>
                         </div>
-
                         <div className="flex items-center gap-3 mt-3">
                           <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500">
                             <ClockIcon />
@@ -214,7 +344,6 @@ const HomePage = () => {
                           </div>
                         </div>
                       </div>
-
                     </div>
                   </div>
                 ))}
