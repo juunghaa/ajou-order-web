@@ -6,54 +6,6 @@ import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
-// 컴포넌트 안에서
-const { user } = useAuth();
-
-const handleOrder = async () => {
-  setLoading(true);
-  
-  try {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // ✅ Supabase에 저장
-    const { data, error } = await supabase
-      .from('orders')
-      .insert({
-        user_id: user?.id || null,
-        cafe_id: cafe?.id,
-        cafe_name: cafe?.name,
-        items: items,
-        total_price: totalPrice,
-        status: 'pending',
-        note: orderNote,
-      })
-      .select()
-      .single();
-    
-    if (error) throw error;
-    
-    clearCart();
-    
-    navigate('/order/complete', { 
-      state: {
-        orderId: data.id,
-        orderNumber: data.order_number,
-        waitingNumber: Math.floor(Math.random() * 5) + 1,
-        cafeName: cafe?.name,
-        items,
-        totalPrice,
-        estimatedTime: '10-15분',
-      }
-    });
-
-  } catch (error) {
-    console.error('주문 실패:', error);
-    alert('주문 처리 중 오류가 발생했습니다.');
-  } finally {
-    setLoading(false);
-  }
-};
-
 const CreditCardIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
@@ -83,6 +35,8 @@ const PAYMENT_METHODS = [
 
 const OrderPage = () => {
   const navigate = useNavigate();
+  // ✅ 수정됨 1: useAuth는 여기서 호출해야 합니다.
+  const { user } = useAuth(); 
   const { items, cafe, totalPrice, clearCart } = useCart();
   
   const [selectedPayment, setSelectedPayment] = useState('kakao');
@@ -97,36 +51,48 @@ const OrderPage = () => {
     return null;
   }
   
-  // 주문 처리
+  // ✅ 수정됨 2: 중복된 함수 정의를 제거하고 하나로 깔끔하게 정리했습니다.
   const handleOrder = async () => {
     setLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      const orderData = {
-        orderId: `AO${Date.now()}`,
-        orderNumber: Math.floor(Math.random() * 100) + 1, 
-        waitingNumber: Math.floor(Math.random() * 5) + 1,  
-        cafeName: cafe?.name,  
-        items,
-        cafe,
-        totalPrice,
-        payment: selectedPayment,
-        note: orderNote,
-        status: 'confirmed',
-        createdAt: new Date().toISOString(),
-        estimatedTime: '10-15분',
-      };
+      // Supabase에 저장
+      const { data, error } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user?.id || null,
+          cafe_id: cafe?.id,
+          cafe_name: cafe?.name,
+          items: items,
+          total_price: totalPrice,
+          status: 'pending',
+          note: orderNote,
+          payment_method: selectedPayment, // 결제 수단도 저장
+        })
+        .select()
+        .single();
       
-      localStorage.setItem('ajouorder_last_order', JSON.stringify(orderData));
-      // clearCart();
-
-      navigate('/order/complete', { state: orderData });
+      if (error) throw error;
+      
+      clearCart();
+      
+      navigate('/order/complete', { 
+        state: {
+          orderId: data.id,
+          orderNumber: data.order_number,
+          waitingNumber: Math.floor(Math.random() * 5) + 1,
+          cafeName: cafe?.name,
+          items,
+          totalPrice,
+          estimatedTime: '10-15분',
+        }
+      });
 
     } catch (error) {
       console.error('주문 실패:', error);
-      alert('주문 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+      alert('주문 처리 중 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
