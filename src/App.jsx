@@ -14,6 +14,8 @@ import LoginPage from './pages/LoginPage';      // ✅ 추가
 import SignupPage from './pages/SignupPage';    // ✅ 추가
 import OrderHistoryPage from './pages/OrderHistoryPage';  // ✅ 추가
 import ProfilePage from './pages/ProfilePage';            // ✅ 추가
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentFailPage from './pages/PaymentFailPage';
 
 function App() {
   return (
@@ -32,6 +34,8 @@ function App() {
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/orders" element={<OrderHistoryPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/payment/success" element={<PaymentSuccessPage />} />
+              <Route path="/payment/fail" element={<PaymentFailPage />} />
             </Routes>
           </div>
         </Router>
