@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';  // ✅ 추가
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';  
 
 const CoffeeIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -51,6 +52,13 @@ const HistoryIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <circle cx="12" cy="12" r="10" />
     <polyline points="12,6 12,12 16,14" />
+  </svg>
+);
+
+const XIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
@@ -114,15 +122,35 @@ const NOTICES = [
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();  // ✅ 추가
+  const { user, logout } = useAuth();
   
   const [activeTab, setActiveTab] = useState('notice');
   const [feedbackText, setFeedbackText] = useState('');
   const [recommendText, setRecommendText] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState(false);
-  const [showProfileMenu, setShowProfileMenu] = useState(false);  // ✅ 추가
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showMobilePanel, setShowMobilePanel] = useState(false);  // ✅ 모바일 패널 상태
   
-  const profileMenuRef = useRef(null);  // ✅ 추가
+  const profileMenuRef = useRef(null);
+  
+  const [submitLoading, setSubmitLoading] = useState(false); 
+  const [recentRecommendations, setRecentRecommendations] = useState([]);  
+  // 최근 추천 메뉴 불러오기
+  useEffect(() => {
+    const loadRecommendations = async () => {
+      const { data } = await supabase
+        .from('menu_recommendations')
+        .select('menu_name, votes')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      if (data) {
+        setRecentRecommendations(data);
+      }
+    };
+    
+    loadRecommendations();
+  }, [submitSuccess]);
   
   // 프로필 메뉴 외부 클릭 시 닫기
   useEffect(() => {
@@ -145,20 +173,56 @@ const HomePage = () => {
     }
   };
   
-  const handleSubmitFeedback = () => {
+  // ✅ 건의사항 제출 (Supabase 저장)
+  const handleSubmitFeedback = async () => {
     if (!feedbackText.trim()) return;
-    console.log('건의사항:', feedbackText);
-    setFeedbackText('');
-    setSubmitSuccess(true);
-    setTimeout(() => setSubmitSuccess(false), 2000);
+    
+    setSubmitLoading(true);
+    try {
+      const { error } = await supabase
+        .from('feedbacks')
+        .insert({
+          user_id: user?.id || null,
+          content: feedbackText.trim(),
+        });
+      
+      if (error) throw error;
+      
+      setFeedbackText('');
+      setSubmitSuccess(true);
+      setTimeout(() => setSubmitSuccess(false), 2000);
+    } catch (error) {
+      console.error('건의사항 제출 실패:', error);
+      alert('제출에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setSubmitLoading(false);
+    }
   };
   
-  const handleSubmitRecommend = () => {
+  // ✅ 메뉴 추천 제출 (Supabase 저장)
+  const handleSubmitRecommend = async () => {
     if (!recommendText.trim()) return;
-    console.log('메뉴 추천:', recommendText);
-    setRecommendText('');
-    setSubmitSuccess(true);
-    setTimeout(() => setSubmitSuccess(false), 2000);
+    
+    setSubmitLoading(true);
+    try {
+      const { error } = await supabase
+        .from('menu_recommendations')
+        .insert({
+          user_id: user?.id || null,
+          menu_name: recommendText.trim(),
+        });
+      
+      if (error) throw error;
+      
+      setRecommendText('');
+      setSubmitSuccess(true);
+      setTimeout(() => setSubmitSuccess(false), 2000);
+    } catch (error) {
+      console.error('메뉴 추천 실패:', error);
+      alert('제출에 실패했습니다. 다시 시도해주세요.');
+    } finally {
+      setSubmitLoading(false);
+    }
   };
   
   // 사용자 이름 가져오기
@@ -172,6 +236,144 @@ const HomePage = () => {
     const name = getUserDisplayName();
     return name.charAt(0).toUpperCase();
   };
+
+  // ✅ 탭 컨텐츠 렌더링 (수정)
+  const renderTabContent = () => (
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {activeTab === 'notice' && (
+        <>
+          <div className="flex-1 flex flex-col gap-3 overflow-auto">
+            {NOTICES.map((notice) => (
+              <div
+                key={notice.id}
+                className={`p-4 rounded-3xl border-2 cursor-pointer transition-all duration-200 hover:shadow-md
+                  ${notice.type === 'event' 
+                    ? 'bg-ajou-accent-light/30 border-ajou-accent/20 hover:border-ajou-accent/40' 
+                    : 'bg-white border-gray-100 hover:border-ajou-primary/20'}`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className={`text-sm font-semibold ${notice.type === 'event' ? 'text-ajou-accent' : 'text-gray-900'}`}>
+                      {notice.title}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{notice.content}</p>
+                  </div>
+                  <span className="text-xs text-gray-400 ml-2">{notice.date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 bg-gradient-to-br from-ajou-primary to-ajou-secondary rounded-3xl p-5 text-white">
+            <p className="text-sm font-medium opacity-90">이번 주 인기 메뉴</p>
+            <p className="text-lg font-bold mt-1">아메리카노 ☕</p>
+            <p className="text-xs opacity-70 mt-2">전체 주문의 45%를 차지했어요</p>
+          </div>
+        </>
+      )}
+      
+      {activeTab === 'feedback' && (
+        <div className="flex-1 flex flex-col">
+          <div className="bg-white rounded-3xl border-2 border-gray-100 p-5 flex-1 flex flex-col">
+            <h4 className="font-bold text-gray-900 mb-2">건의사항 보내기</h4>
+            <p className="text-xs text-gray-500 mb-4">서비스 개선을 위한 의견을 보내주세요!</p>
+            <textarea
+              value={feedbackText}
+              onChange={(e) => setFeedbackText(e.target.value)}
+              placeholder="불편한 점, 개선 아이디어 등을 자유롭게 작성해주세요..."
+              className="flex-1 w-full p-3 bg-gray-50 rounded-2xl border-0 resize-none text-sm focus:outline-none focus:ring-2 focus:ring-ajou-primary/20 min-h-[120px]"
+              maxLength={500}
+            />
+            <p className="text-xs text-gray-400 mt-1 text-right">{feedbackText.length}/500</p>
+            <button
+              onClick={handleSubmitFeedback}
+              disabled={!feedbackText.trim() || submitLoading}
+              className={`mt-3 w-full py-3 rounded-2xl font-medium text-sm flex items-center justify-center gap-2 transition-all
+                ${feedbackText.trim() && !submitLoading 
+                  ? 'bg-ajou-primary text-white hover:bg-ajou-dark' 
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+            >
+              {submitLoading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <SendIcon />
+                  보내기
+                </>
+              )}
+            </button>
+          </div>
+          {submitSuccess && activeTab === 'feedback' && (
+            <div className="mt-3 bg-green-100 text-green-700 text-sm font-medium py-3 px-4 rounded-2xl text-center animate-fade-in">
+              ✅ 소중한 의견 감사합니다!
+            </div>
+          )}
+        </div>
+      )}
+      
+      {activeTab === 'recommend' && (
+        <div className="flex-1 flex flex-col">
+          <div className="bg-gradient-to-br from-ajou-accent-light to-white rounded-3xl border-2 border-ajou-accent/20 p-5 flex-1 flex flex-col">
+            <h4 className="font-bold text-ajou-accent mb-2">✨ 메뉴 추천하기</h4>
+            <p className="text-xs text-gray-500 mb-4">카페에 있었으면 하는 메뉴를 추천해주세요!</p>
+            <textarea
+              value={recommendText}
+              onChange={(e) => setRecommendText(e.target.value)}
+              placeholder="예) 딸기 라떼, 말차 크로와상..."
+              className="flex-1 w-full p-3 bg-white rounded-2xl border-0 resize-none text-sm focus:outline-none focus:ring-2 focus:ring-ajou-accent/20 min-h-[120px]"
+              maxLength={100}
+            />
+            <p className="text-xs text-gray-400 mt-1 text-right">{recommendText.length}/100</p>
+            <button
+              onClick={handleSubmitRecommend}
+              disabled={!recommendText.trim() || submitLoading}
+              className={`mt-3 w-full py-3 rounded-2xl font-medium text-sm flex items-center justify-center gap-2 transition-all
+                ${recommendText.trim() && !submitLoading 
+                  ? 'bg-ajou-accent text-white hover:opacity-90' 
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+            >
+              {submitLoading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <SendIcon />
+                  추천하기
+                </>
+              )}
+            </button>
+          </div>
+          
+          {/* ✅ 최근 추천된 메뉴 (DB에서 불러오기) */}
+          <div className="mt-4 bg-white rounded-2xl p-4 border border-gray-100">
+            <p className="text-xs font-medium text-gray-500 mb-2">🔥 최근 추천된 메뉴</p>
+            <div className="flex flex-wrap gap-2">
+              {recentRecommendations.length > 0 ? (
+                recentRecommendations.map((rec, idx) => (
+                  <span 
+                    key={idx}
+                    className={`px-3 py-1 text-xs rounded-full ${
+                      idx === 0 ? 'bg-ajou-light text-ajou-primary' :
+                      idx === 1 ? 'bg-ajou-accent-light text-ajou-accent' :
+                      'bg-gray-100 text-gray-600'
+                    }`}
+                  >
+                    {rec.menu_name}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-gray-400">아직 추천된 메뉴가 없어요</span>
+              )}
+            </div>
+          </div>
+          
+          {submitSuccess && activeTab === 'recommend' && (
+            <div className="mt-3 bg-green-100 text-green-700 text-sm font-medium py-3 px-4 rounded-2xl text-center animate-fade-in">
+              ✅ 추천해주셔서 감사합니다!
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
   
   return (
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
@@ -196,12 +398,8 @@ const HomePage = () => {
                 관리자
               </button>
               <span className="text-sm text-gray-500 hidden sm:block">아주대학교</span>
-              {/* <div className="w-8 h-8 bg-ajou-light rounded-full flex items-center justify-center">
-                <span className="text-ajou-primary text-sm font-medium">👤</span>
-              </div> */}
-              {/* ✅ 프로필 영역 수정 */}
+              
               {user ? (
-                // 로그인 상태
                 <div className="relative" ref={profileMenuRef}>
                   <button
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
@@ -215,16 +413,13 @@ const HomePage = () => {
                     </span>
                   </button>
                   
-                  {/* 프로필 드롭다운 메뉴 */}
                   {showProfileMenu && (
                     <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-gray-100 py-2 z-50">
-                      {/* 사용자 정보 */}
                       <div className="px-4 py-3 border-b border-gray-100">
                         <p className="font-semibold text-gray-900">{getUserDisplayName()}</p>
                         <p className="text-sm text-gray-500 truncate">{user.email}</p>
                       </div>
                       
-                      {/* 메뉴 항목 */}
                       <div className="py-1">
                         <button
                           onClick={() => {
@@ -248,7 +443,6 @@ const HomePage = () => {
                         </button>
                       </div>
                       
-                      {/* 로그아웃 */}
                       <div className="border-t border-gray-100 pt-1">
                         <button
                           onClick={handleLogout}
@@ -262,7 +456,6 @@ const HomePage = () => {
                   )}
                 </div>
               ) : (
-                // 비로그인 상태
                 <button
                   onClick={() => navigate('/login')}
                   className="flex items-center gap-2 px-4 py-2 bg-ajou-primary text-white text-sm font-medium rounded-xl hover:bg-ajou-dark transition-colors"
@@ -276,7 +469,7 @@ const HomePage = () => {
         </div>
       </header>
       
-      {/* 메인 컨텐츠 - 기존과 동일 */}
+      {/* 메인 컨텐츠 */}
       <main className="flex-1 overflow-hidden">
         <div className="h-full max-w-7xl mx-auto px-6 lg:px-8 py-6">
           <div className="h-full flex gap-6">
@@ -366,7 +559,7 @@ const HomePage = () => {
               </div>
             </div>
             
-            {/* 오른쪽: 탭 패널 */}
+            {/* 오른쪽: 탭 패널 (데스크탑) */}
             <div className="w-80 flex-shrink-0 hidden lg:flex flex-col">
               <div className="flex bg-gray-100 rounded-2xl p-1 mb-4">
                 <button
@@ -395,110 +588,13 @@ const HomePage = () => {
                 </button>
               </div>
               
-              <div className="flex-1 flex flex-col overflow-hidden">
-                {activeTab === 'notice' && (
-                  <>
-                    <div className="flex-1 flex flex-col gap-3 overflow-auto">
-                      {NOTICES.map((notice) => (
-                        <div
-                          key={notice.id}
-                          className={`p-4 rounded-3xl border-2 cursor-pointer transition-all duration-200 hover:shadow-md
-                            ${notice.type === 'event' 
-                              ? 'bg-ajou-accent-light/30 border-ajou-accent/20 hover:border-ajou-accent/40' 
-                              : 'bg-white border-gray-100 hover:border-ajou-primary/20'}`}
-                        >
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <p className={`text-sm font-semibold ${notice.type === 'event' ? 'text-ajou-accent' : 'text-gray-900'}`}>
-                                {notice.title}
-                              </p>
-                              <p className="text-xs text-gray-500 mt-1 line-clamp-2">{notice.content}</p>
-                            </div>
-                            <span className="text-xs text-gray-400 ml-2">{notice.date}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-4 bg-gradient-to-br from-ajou-primary to-ajou-secondary rounded-3xl p-5 text-white">
-                      <p className="text-sm font-medium opacity-90">이번 주 인기 메뉴</p>
-                      <p className="text-lg font-bold mt-1">아메리카노 ☕</p>
-                      <p className="text-xs opacity-70 mt-2">전체 주문의 45%를 차지했어요</p>
-                    </div>
-                  </>
-                )}
-                
-                {activeTab === 'feedback' && (
-                  <div className="flex-1 flex flex-col">
-                    <div className="bg-white rounded-3xl border-2 border-gray-100 p-5 flex-1 flex flex-col">
-                      <h4 className="font-bold text-gray-900 mb-2">건의사항 보내기</h4>
-                      <p className="text-xs text-gray-500 mb-4">서비스 개선을 위한 의견을 보내주세요!</p>
-                      <textarea
-                        value={feedbackText}
-                        onChange={(e) => setFeedbackText(e.target.value)}
-                        placeholder="불편한 점, 개선 아이디어 등을 자유롭게 작성해주세요..."
-                        className="flex-1 w-full p-3 bg-gray-50 rounded-2xl border-0 resize-none text-sm focus:outline-none focus:ring-2 focus:ring-ajou-primary/20"
-                      />
-                      <button
-                        onClick={handleSubmitFeedback}
-                        disabled={!feedbackText.trim()}
-                        className={`mt-4 w-full py-3 rounded-2xl font-medium text-sm flex items-center justify-center gap-2 transition-all
-                          ${feedbackText.trim() ? 'bg-ajou-primary text-white hover:bg-ajou-dark' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
-                      >
-                        <SendIcon />
-                        보내기
-                      </button>
-                    </div>
-                    {submitSuccess && (
-                      <div className="mt-3 bg-green-100 text-green-700 text-sm font-medium py-3 px-4 rounded-2xl text-center animate-fade-in">
-                        ✅ 소중한 의견 감사합니다!
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {activeTab === 'recommend' && (
-                  <div className="flex-1 flex flex-col">
-                    <div className="bg-gradient-to-br from-ajou-accent-light to-white rounded-3xl border-2 border-ajou-accent/20 p-5 flex-1 flex flex-col">
-                      <h4 className="font-bold text-ajou-accent mb-2">✨ 메뉴 추천하기</h4>
-                      <p className="text-xs text-gray-500 mb-4">카페에 있었으면 하는 메뉴를 추천해주세요!</p>
-                      <textarea
-                        value={recommendText}
-                        onChange={(e) => setRecommendText(e.target.value)}
-                        placeholder="예) 딸기 라떼, 말차 크로와상..."
-                        className="flex-1 w-full p-3 bg-white rounded-2xl border-0 resize-none text-sm focus:outline-none focus:ring-2 focus:ring-ajou-accent/20"
-                      />
-                      <button
-                        onClick={handleSubmitRecommend}
-                        disabled={!recommendText.trim()}
-                        className={`mt-4 w-full py-3 rounded-2xl font-medium text-sm flex items-center justify-center gap-2 transition-all
-                          ${recommendText.trim() ? 'bg-ajou-accent text-white hover:opacity-90' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
-                      >
-                        <SendIcon />
-                        추천하기
-                      </button>
-                    </div>
-                    <div className="mt-4 bg-white rounded-2xl p-4 border border-gray-100">
-                      <p className="text-xs font-medium text-gray-500 mb-2">🔥 최근 추천된 메뉴</p>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="px-3 py-1 bg-ajou-light text-ajou-primary text-xs rounded-full">말차 라떼</span>
-                        <span className="px-3 py-1 bg-ajou-accent-light text-ajou-accent text-xs rounded-full">흑당 버블티</span>
-                        <span className="px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">에그 타르트</span>
-                      </div>
-                    </div>
-                    {submitSuccess && (
-                      <div className="mt-3 bg-green-100 text-green-700 text-sm font-medium py-3 px-4 rounded-2xl text-center animate-fade-in">
-                        ✅ 추천해주셔서 감사합니다!
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+              {renderTabContent()}
             </div>
           </div>
         </div>
       </main>
       
-      {/* 모바일 플로팅 버튼 */}
+      {/* ✅ 모바일 플로팅 버튼 */}
       <div className="lg:hidden fixed bottom-6 right-6 flex flex-col gap-3">
         <button 
           onClick={() => navigate('/admin')}
@@ -506,10 +602,76 @@ const HomePage = () => {
         >
           ⚙️
         </button>
-        <button className="w-14 h-14 bg-ajou-primary text-white rounded-full shadow-lg flex items-center justify-center text-xl">
+        <button 
+          onClick={() => setShowMobilePanel(true)}
+          className="w-14 h-14 bg-ajou-primary text-white rounded-full shadow-lg flex items-center justify-center text-xl"
+        >
           📢
         </button>
       </div>
+      
+      {/* ✅ 모바일 바텀시트 */}
+      {showMobilePanel && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          {/* 배경 오버레이 */}
+          <div 
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setShowMobilePanel(false)}
+          />
+          
+          {/* 바텀시트 */}
+          <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] flex flex-col animate-slide-up">
+            {/* 핸들 */}
+            <div className="flex justify-center pt-3 pb-2">
+              <div className="w-10 h-1 bg-gray-300 rounded-full" />
+            </div>
+            
+            {/* 헤더 */}
+            <div className="flex items-center justify-between px-6 pb-4">
+              <h3 className="text-lg font-bold text-gray-900">소식 & 의견</h3>
+              <button 
+                onClick={() => setShowMobilePanel(false)}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <XIcon />
+              </button>
+            </div>
+            
+            {/* 탭 */}
+            <div className="flex bg-gray-100 rounded-2xl p-1 mx-6 mb-4">
+              <button
+                onClick={() => setActiveTab('notice')}
+                className={`flex-1 py-2 px-3 text-sm font-medium rounded-xl transition-all ${
+                  activeTab === 'notice' ? 'bg-white text-ajou-primary shadow-sm' : 'text-gray-500'
+                }`}
+              >
+                📢 공지
+              </button>
+              <button
+                onClick={() => setActiveTab('feedback')}
+                className={`flex-1 py-2 px-3 text-sm font-medium rounded-xl transition-all ${
+                  activeTab === 'feedback' ? 'bg-white text-ajou-primary shadow-sm' : 'text-gray-500'
+                }`}
+              >
+                💬 건의
+              </button>
+              <button
+                onClick={() => setActiveTab('recommend')}
+                className={`flex-1 py-2 px-3 text-sm font-medium rounded-xl transition-all ${
+                  activeTab === 'recommend' ? 'bg-white text-ajou-primary shadow-sm' : 'text-gray-500'
+                }`}
+              >
+                ✨ 추천
+              </button>
+            </div>
+            
+            {/* 탭 컨텐츠 */}
+            <div className="flex-1 overflow-auto px-6 pb-6">
+              {renderTabContent()}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
