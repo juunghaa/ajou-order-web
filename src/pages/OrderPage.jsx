@@ -51,12 +51,31 @@ const OrderPage = () => {
     return null;
   }
   
-  // ✅ 수정됨 2: 중복된 함수 정의를 제거하고 하나로 깔끔하게 정리했습니다.
   const handleOrder = async () => {
     setLoading(true);
     
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // ✅ 1. 해당 카페의 마지막 주문번호 조회
+      const { data: lastOrder } = await supabase
+        .from('orders')
+        .select('order_number')
+        .eq('cafe_id', cafe?.id)
+        .order('order_number', { ascending: false })
+        .limit(1)
+        .single();
+      
+      const nextOrderNumber = lastOrder ? lastOrder.order_number + 1 : 1;
+      
+      // ✅ 2. 해당 카페의 대기중인 주문 수 조회 (대기 순번 계산)
+      const { count: pendingCount } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('cafe_id', cafe?.id)
+        .in('status', ['pending', 'preparing']);
+      
+      const waitingNumber = (pendingCount || 0) + 1;  // 내 순번
       
       // Supabase에 저장
       const { data, error } = await supabase
@@ -69,27 +88,26 @@ const OrderPage = () => {
           total_price: totalPrice,
           status: 'pending',
           note: orderNote,
-          payment_method: selectedPayment, // 결제 수단도 저장
+          payment_method: selectedPayment,
+          order_number: nextOrderNumber,
         })
         .select()
         .single();
       
       if (error) throw error;
       
-      // clearCart();
-      
       navigate('/order/complete', { 
         state: {
           orderId: data.id,
-          orderNumber: data.order_number,
-          waitingNumber: Math.floor(Math.random() * 5) + 1,
+          orderNumber: nextOrderNumber,      // ✅ 카페별 주문번호
+          waitingNumber: waitingNumber,      // ✅ 실제 대기 순번
           cafeName: cafe?.name,
           items,
           totalPrice,
-          estimatedTime: '10-15분',
+          estimatedTime: `${waitingNumber * 3}-${waitingNumber * 5}분`,  // ✅ 대기 순번 기반 예상 시간
         }
       });
-
+  
     } catch (error) {
       console.error('주문 실패:', error);
       alert('주문 처리 중 오류가 발생했습니다.');
