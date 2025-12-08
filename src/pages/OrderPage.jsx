@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loadTossPayments } from '@tosspayments/payment-sdk';
 import Header from '../components/common/Header';
@@ -47,6 +47,9 @@ const OrderPage = () => {
   const [orderNote, setOrderNote] = useState('');
   const [tossPayments, setTossPayments] = useState(null);
   
+  // ✅ 주문 처리 중 플래그 (ref 사용 - 리렌더링 안 함)
+  const isProcessingRef = useRef(false);
+  
   const formatPrice = (price) => new Intl.NumberFormat('ko-KR').format(price);
   
   // 토스 SDK 초기화
@@ -56,14 +59,25 @@ const OrderPage = () => {
     });
   }, []);
   
-  // 장바구니가 비어있으면 홈으로
+  // ✅ 장바구니가 비어있으면 홈으로 (처리 중이 아닐 때만!)
+  useEffect(() => {
+    if (items.length === 0 && !isProcessingRef.current) {
+      navigate('/');
+    }
+  }, [items, navigate]);
+  
+  // 장바구니가 비어있으면 로딩 표시
   if (items.length === 0) {
-    navigate('/');
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-ajou-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
   }
   
   const handleOrder = async () => {
     setLoading(true);
+    isProcessingRef.current = true;  // ✅ 처리 시작
     
     try {
       // 1. 주문번호 생성
@@ -93,15 +107,21 @@ const OrderPage = () => {
       
       const waitingNumber = (pendingCount || 0) + 1;
       
-      // 4. 주문 정보 임시 저장 (결제 전)
+      // ✅ 4. 현재 items 복사 (clearCart 전에)
+      const currentItems = [...items];
+      const currentTotalPrice = totalPrice;
+      const currentCafeName = cafe?.name;
+      const currentCafeId = cafe?.id;
+      
+      // 5. 주문 정보 임시 저장 (결제 전)
       const orderData = {
         orderId,
         orderNumber: nextOrderNumber,
         waitingNumber,
-        cafeName: cafe?.name,
-        cafeId: cafe?.id,
-        items,
-        totalPrice,
+        cafeName: currentCafeName,
+        cafeId: currentCafeId,
+        items: currentItems,
+        totalPrice: currentTotalPrice,
         note: orderNote,
         paymentMethod: selectedPayment,
         estimatedTime: `${Math.max(5, waitingNumber * 3)}-${Math.max(10, waitingNumber * 5)}분`,
@@ -110,14 +130,14 @@ const OrderPage = () => {
       // localStorage에 임시 저장 (결제 성공 후 사용)
       localStorage.setItem('pendingOrder', JSON.stringify(orderData));
       
-      // 5. 토스 결제인 경우
+      // 6. 토스 결제인 경우
       if (selectedPayment === 'toss' && tossPayments) {
         await tossPayments.requestPayment('카드', {
-          amount: totalPrice,
+          amount: currentTotalPrice,
           orderId: orderId,
-          orderName: items.length > 1 
-            ? `${items[0].name} 외 ${items.length - 1}건` 
-            : items[0].name,
+          orderName: currentItems.length > 1 
+            ? `${currentItems[0].name} 외 ${currentItems.length - 1}건` 
+            : currentItems[0].name,
           customerName: user?.user_metadata?.display_name || '고객',
           successUrl: `${window.location.origin}/payment/success`,
           failUrl: `${window.location.origin}/payment/fail`,
@@ -125,13 +145,52 @@ const OrderPage = () => {
         return; // 토스 결제 페이지로 리다이렉트
       }
       
-      // 6. 다른 결제 수단 (시뮬레이션)
-      await processOrderWithoutToss(orderData);
+      // 7. 다른 결제 수단 (시뮬레이션)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const { data, error } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user?.id || null,
+          cafe_id: currentCafeId,
+          cafe_name: currentCafeName,
+          items: currentItems,
+          total_price: currentTotalPrice,
+          status: 'pending',
+          note: orderNote,
+          payment_method: selectedPayment,
+          order_number: nextOrderNumber,
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      localStorage.removeItem('pendingOrder');
+      
+      // ✅ navigate 먼저, clearCart 나중에!
+      navigate('/order/complete', { 
+        replace: true,  // ✅ 뒤로가기 방지
+        state: {
+          orderId: data.id,
+          orderNumber: nextOrderNumber,
+          waitingNumber: waitingNumber,
+          cafeName: currentCafeName,
+          items: currentItems,
+          totalPrice: currentTotalPrice,
+          estimatedTime: orderData.estimatedTime,
+        }
+      });
+      
+      // ✅ navigate 후 clearCart
+      setTimeout(() => {
+        clearCart();
+      }, 100);
       
     } catch (error) {
       console.error('주문 실패:', error);
+      isProcessingRef.current = false;  // ✅ 에러 시 플래그 해제
       
-      // 토스 결제 취소인 경우
       if (error.code === 'USER_CANCEL') {
         alert('결제가 취소되었습니다.');
       } else {
@@ -140,44 +199,6 @@ const OrderPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-  
-  // 토스 외 결제 처리 (시뮬레이션)
-  const processOrderWithoutToss = async (orderData) => {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const { data, error } = await supabase
-      .from('orders')
-      .insert({
-        user_id: user?.id || null,
-        cafe_id: orderData.cafeId,
-        cafe_name: orderData.cafeName,
-        items: orderData.items,
-        total_price: orderData.totalPrice,
-        status: 'pending',
-        note: orderData.note,
-        payment_method: orderData.paymentMethod,
-        order_number: orderData.orderNumber,
-      })
-      .select()
-      .single();
-    
-    if (error) throw error;
-    
-    clearCart();
-    localStorage.removeItem('pendingOrder');
-    
-    navigate('/order/complete', { 
-      state: {
-        orderId: data.id,
-        orderNumber: orderData.orderNumber,
-        waitingNumber: orderData.waitingNumber,
-        cafeName: orderData.cafeName,
-        items: orderData.items,
-        totalPrice: orderData.totalPrice,
-        estimatedTime: orderData.estimatedTime,
-      }
-    });
   };
   
   return (
@@ -263,7 +284,6 @@ const OrderPage = () => {
                 })}
               </div>
               
-              {/* 토스 선택 시 안내 */}
               {selectedPayment === 'toss' && (
                 <div className="mt-4 p-3 bg-blue-50 rounded-xl">
                   <p className="text-xs text-blue-700">
@@ -298,14 +318,12 @@ const OrderPage = () => {
                 </div>
               </div>
               
-              {/* 데스크탑 결제 버튼 */}
               <div className="hidden lg:block mt-6">
                 <Button size="full" onClick={handleOrder} loading={loading}>
                   {loading ? '결제 처리 중...' : `${formatPrice(totalPrice)}원 결제하기`}
                 </Button>
               </div>
               
-              {/* 안내 */}
               <div className="mt-6 p-4 bg-gray-50 rounded-xl">
                 <p className="text-xs text-gray-500 leading-relaxed">
                   • 주문 후 취소는 매장에 직접 문의해주세요.<br />

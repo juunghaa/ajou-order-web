@@ -62,45 +62,45 @@ const XIcon = () => (
   </svg>
 );
 
-// 실제 카페 데이터
-const CAFES = [
-  {
-    id: 'ajou-cafe-1',
-    name: '팬도로시 학생회관점',
-    location: '학생회관 2층',
-    imageUrl: 'https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNTAzMDVfMTEw%2FMDAxNzQxMTM1MTUxOTY4.Ir61PzuObmq7hJb76s9Cc3PeKY72XirWpPzaLcCFG3cg.fYw4u_GXqJ0XGvJad-TyslsNjmvB99KAcP7GKeMLd34g.JPEG%2F1000049512.jpg.jpg%3Ftype%3Dw1500_60_sharpen',
-    isOpen: true,
-    waitTime: '5분',
-    rating: 4.3,
-  },
-  {
-    id: 'ajou-cafe-2',
-    name: '팬도로시 도서관점',
-    location: '중앙도서관 1층',
-    imageUrl: 'https://polle-image.tabling.co.kr/posts/1Lrl_kgNnvvzB5z0j5fO4g.jpg?s=800x800',
-    isOpen: false,
-    waitTime: '-',
-    rating: 4.7,
-  },
-  {
-    id: 'ajou-cafe-3',
-    name: 'CAFÉ ING',
-    location: '일신관 1층',
-    imageUrl: 'https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNDA0MDVfMTc5%2FMDAxNzEyMzEzNTk2ODE5.hmhM74kEgAYhKDtVPAvIy6cgAkXrTaSQYHY2ImLbhbAg.lijIewfajsdpBUD59mevCALkrmVG6ztJCzFEfl1jCncg.JPEG%2F20240404_090438.jpg.jpg%3Ftype%3Dw1500_60_sharpen',
-    isOpen: true,
-    waitTime: '5분',
-    rating: 4.5,
-  },
-  {
-    id: 'ajou-cafe-4',
-    name: '다산관 카페',
-    location: '다산관 1층',
-    imageUrl: 'https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNTAzMjRfNTgg%2FMDAxNzQyNzkxNjc0ODkz.eIUSqv-Zz8G1nyQTz1yP9XtIfp0MxOjpO_6sPK7XQrkg.qA7Ff9SmsUnN07PHrs9mKpmlNO89O9lEedkZaUEgX_8g.JPEG%2F20250324_134512.jpg.jpg%3Ftype%3Dw1500_60_sharpen',
-    isOpen: true,
-    waitTime: '5분',
-    rating: 4.3,
-  },
-];
+// // 실제 카페 데이터
+// const CAFES = [
+//   {
+//     id: 'ajou-cafe-1',
+//     name: '팬도로시 학생회관점',
+//     location: '학생회관 2층',
+//     imageUrl: 'https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNTAzMDVfMTEw%2FMDAxNzQxMTM1MTUxOTY4.Ir61PzuObmq7hJb76s9Cc3PeKY72XirWpPzaLcCFG3cg.fYw4u_GXqJ0XGvJad-TyslsNjmvB99KAcP7GKeMLd34g.JPEG%2F1000049512.jpg.jpg%3Ftype%3Dw1500_60_sharpen',
+//     isOpen: true,
+//     waitTime: '5분',
+//     rating: 4.3,
+//   },
+//   {
+//     id: 'ajou-cafe-2',
+//     name: '팬도로시 도서관점',
+//     location: '중앙도서관 1층',
+//     imageUrl: 'https://polle-image.tabling.co.kr/posts/1Lrl_kgNnvvzB5z0j5fO4g.jpg?s=800x800',
+//     isOpen: false,
+//     waitTime: '-',
+//     rating: 4.7,
+//   },
+//   {
+//     id: 'ajou-cafe-3',
+//     name: 'CAFÉ ING',
+//     location: '일신관 1층',
+//     imageUrl: 'https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNDA0MDVfMTc5%2FMDAxNzEyMzEzNTk2ODE5.hmhM74kEgAYhKDtVPAvIy6cgAkXrTaSQYHY2ImLbhbAg.lijIewfajsdpBUD59mevCALkrmVG6ztJCzFEfl1jCncg.JPEG%2F20240404_090438.jpg.jpg%3Ftype%3Dw1500_60_sharpen',
+//     isOpen: true,
+//     waitTime: '5분',
+//     rating: 4.5,
+//   },
+//   {
+//     id: 'ajou-cafe-4',
+//     name: '다산관 카페',
+//     location: '다산관 1층',
+//     imageUrl: 'https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNTAzMjRfNTgg%2FMDAxNzQyNzkxNjc0ODkz.eIUSqv-Zz8G1nyQTz1yP9XtIfp0MxOjpO_6sPK7XQrkg.qA7Ff9SmsUnN07PHrs9mKpmlNO89O9lEedkZaUEgX_8g.JPEG%2F20250324_134512.jpg.jpg%3Ftype%3Dw1500_60_sharpen',
+//     isOpen: true,
+//     waitTime: '5분',
+//     rating: 4.3,
+//   },
+// ];
 
 // 공지사항 데이터
 const NOTICES = [
@@ -123,6 +123,9 @@ const NOTICES = [
 const HomePage = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  
+  const [cafes, setCafes] = useState([]);  // ✅ 카페 목록 state
+  const [cafesLoading, setCafesLoading] = useState(true);  // ✅ 로딩 상태
   
   const [activeTab, setActiveTab] = useState('notice');
   const [feedbackText, setFeedbackText] = useState('');
@@ -375,6 +378,57 @@ const HomePage = () => {
     </div>
   );
   
+  // ✅ 카페 목록 불러오기
+  useEffect(() => {
+    const loadCafes = async () => {
+      const { data, error } = await supabase
+        .from('cafes')
+        .select('*')
+        .order('id');
+      
+      if (!error && data) {
+        // DB 컬럼명을 기존 형식으로 변환
+        const formattedCafes = data.map(cafe => ({
+          id: cafe.id,
+          name: cafe.name,
+          location: cafe.location,
+          imageUrl: cafe.image_url,
+          isOpen: cafe.is_open,
+          waitTime: cafe.wait_time,
+          rating: cafe.rating,
+        }));
+        setCafes(formattedCafes);
+      }
+      setCafesLoading(false);
+    };
+    
+    loadCafes();
+    
+    // 실시간 구독
+    const channel = supabase
+      .channel('cafes-home-channel')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'cafes' },
+        (payload) => {
+          setCafes(prev => prev.map(cafe => 
+            cafe.id === payload.new.id 
+              ? {
+                  ...cafe,
+                  isOpen: payload.new.is_open,
+                  waitTime: payload.new.wait_time,
+                }
+              : cafe
+          ));
+        }
+      )
+      .subscribe();
+    
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   return (
     <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
       {/* 헤더 */}
@@ -483,7 +537,7 @@ const HomePage = () => {
               
               {/* 카페 카드 그리드 */}
               <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 content-start overflow-auto">
-                {CAFES.map((cafe) => (
+                {cafes.map((cafe) => (
                   <div
                     key={cafe.id}
                     onClick={() => cafe.isOpen && navigate(`/cafe/${cafe.id}/menu`)}
@@ -545,7 +599,7 @@ const HomePage = () => {
               {/* 하단 통계 */}
               <div className="mt-4 flex gap-3">
                 <div className="flex-1 bg-ajou-light/50 rounded-2xl p-4 text-center">
-                  <p className="text-2xl font-bold text-ajou-primary">{CAFES.filter(c => c.isOpen).length}</p>
+                  <p className="text-2xl font-bold text-ajou-primary">{cafes.filter(c => c.isOpen).length}</p>
                   <p className="text-xs text-gray-500 mt-1">영업중</p>
                 </div>
                 <div className="flex-1 bg-ajou-accent-light/50 rounded-2xl p-4 text-center">
