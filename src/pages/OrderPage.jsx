@@ -84,14 +84,16 @@ const OrderPage = () => {
       const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       // 2. 해당 카페의 오늘 마지막 주문번호 조회
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
+      const now = new Date();
+      const koreaDateStr = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }); // "2024-12-08"
+      const todayStartKorea = new Date(koreaDateStr + 'T00:00:00+09:00').toISOString();
+      // console.log('한국 기준 오늘 시작:', todayStartKorea);  // 디버깅용
+
       const { data: lastOrders } = await supabase
         .from('orders')
         .select('order_number')
         .eq('cafe_id', cafe?.id)
-        .gte('created_at', today.toISOString())
+        .gte('created_at', todayStartKorea)  // 한국 시간 기준
         .order('order_number', { ascending: false })
         .limit(1);
       
