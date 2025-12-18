@@ -177,7 +177,6 @@ const MenuPage = () => {
           
           <div className="pb-4">
             <div className="relative">
-              <SearchIcon />
               <input
                 type="text"
                 placeholder="메뉴 검색..."
