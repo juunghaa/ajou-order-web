@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getMenusByCafeId } from '../data/menuData';  // ✅ 추가
 
 const AiRecommendModal = ({ isOpen, onClose, cafeId }) => {
   const [message, setMessage] = useState('');
@@ -10,10 +11,21 @@ const AiRecommendModal = ({ isOpen, onClose, cafeId }) => {
     
     setLoading(true);
     try {
+      // ✅ 프론트에서 메뉴 데이터 가져오기
+      const cafeData = getMenusByCafeId(cafeId);
+      const menuList = cafeData.menus.map(m => 
+        `${m.name} (${m.price}원, ${m.category})`
+      );
+      
       const res = await fetch('https://ajou-order-server.onrender.com/api/ai/recommend', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message, cafeId }),
+        body: JSON.stringify({ 
+          message, 
+          cafeId,
+          cafeName: cafeData.cafeName,
+          menus: menuList  // ✅ 메뉴 목록 전달
+        }),
       });
       
       const data = await res.json();
@@ -38,7 +50,7 @@ const AiRecommendModal = ({ isOpen, onClose, cafeId }) => {
         
         {/* AI 응답 */}
         {response && (
-          <div className="mb-4 p-4 bg-ajou-light rounded-2xl">
+          <div className="mb-4 p-4 bg-purple-50 rounded-2xl">
             <p className="text-sm text-gray-700 whitespace-pre-wrap">{response}</p>
           </div>
         )}
@@ -50,13 +62,13 @@ const AiRecommendModal = ({ isOpen, onClose, cafeId }) => {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="예: 달달한 거 추천해줘!"
-            className="flex-1 px-4 py-3 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-ajou-primary"
+            className="flex-1 px-4 py-3 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
             onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
           />
           <button
             onClick={handleSubmit}
             disabled={loading || !message.trim()}
-            className="px-4 py-3 bg-ajou-primary text-white rounded-xl font-medium disabled:opacity-50"
+            className="px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium disabled:opacity-50"
           >
             {loading ? '...' : '🔮'}
           </button>
