@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';  
+import { fetchCafes, submitFeedback, submitRecommendation, fetchRecommendations } from '../api';
 
 const CoffeeIcon = () => (
   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -62,46 +63,6 @@ const XIcon = () => (
   </svg>
 );
 
-// // 실제 카페 데이터
-// const CAFES = [
-//   {
-//     id: 'ajou-cafe-1',
-//     name: '팬도로시 학생회관점',
-//     location: '학생회관 2층',
-//     imageUrl: 'https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNTAzMDVfMTEw%2FMDAxNzQxMTM1MTUxOTY4.Ir61PzuObmq7hJb76s9Cc3PeKY72XirWpPzaLcCFG3cg.fYw4u_GXqJ0XGvJad-TyslsNjmvB99KAcP7GKeMLd34g.JPEG%2F1000049512.jpg.jpg%3Ftype%3Dw1500_60_sharpen',
-//     isOpen: true,
-//     waitTime: '5분',
-//     rating: 4.3,
-//   },
-//   {
-//     id: 'ajou-cafe-2',
-//     name: '팬도로시 도서관점',
-//     location: '중앙도서관 1층',
-//     imageUrl: 'https://polle-image.tabling.co.kr/posts/1Lrl_kgNnvvzB5z0j5fO4g.jpg?s=800x800',
-//     isOpen: false,
-//     waitTime: '-',
-//     rating: 4.7,
-//   },
-//   {
-//     id: 'ajou-cafe-3',
-//     name: 'CAFÉ ING',
-//     location: '일신관 1층',
-//     imageUrl: 'https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNDA0MDVfMTc5%2FMDAxNzEyMzEzNTk2ODE5.hmhM74kEgAYhKDtVPAvIy6cgAkXrTaSQYHY2ImLbhbAg.lijIewfajsdpBUD59mevCALkrmVG6ztJCzFEfl1jCncg.JPEG%2F20240404_090438.jpg.jpg%3Ftype%3Dw1500_60_sharpen',
-//     isOpen: true,
-//     waitTime: '5분',
-//     rating: 4.5,
-//   },
-//   {
-//     id: 'ajou-cafe-4',
-//     name: '다산관 카페',
-//     location: '다산관 1층',
-//     imageUrl: 'https://search.pstatic.net/common/?src=https%3A%2F%2Fpup-review-phinf.pstatic.net%2FMjAyNTAzMjRfNTgg%2FMDAxNzQyNzkxNjc0ODkz.eIUSqv-Zz8G1nyQTz1yP9XtIfp0MxOjpO_6sPK7XQrkg.qA7Ff9SmsUnN07PHrs9mKpmlNO89O9lEedkZaUEgX_8g.JPEG%2F20250324_134512.jpg.jpg%3Ftype%3Dw1500_60_sharpen',
-//     isOpen: true,
-//     waitTime: '5분',
-//     rating: 4.3,
-//   },
-// ];
-
 // 공지사항 데이터
 const NOTICES = [
   {
@@ -124,34 +85,31 @@ const HomePage = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   
-  const [cafes, setCafes] = useState([]);  // ✅ 카페 목록 state
-  const [cafesLoading, setCafesLoading] = useState(true);  // ✅ 로딩 상태
+  const [cafes, setCafes] = useState([]);
+  const [cafesLoading, setCafesLoading] = useState(true);
   
   const [activeTab, setActiveTab] = useState('notice');
   const [feedbackText, setFeedbackText] = useState('');
   const [recommendText, setRecommendText] = useState('');
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [showMobilePanel, setShowMobilePanel] = useState(false);  // ✅ 모바일 패널 상태
+  const [showMobilePanel, setShowMobilePanel] = useState(false);
   
   const profileMenuRef = useRef(null);
   
   const [submitLoading, setSubmitLoading] = useState(false); 
   const [recentRecommendations, setRecentRecommendations] = useState([]);  
-  // 최근 추천 메뉴 불러오기
+  
+  // ✅ 최근 추천 메뉴 불러오기 (API로 변경)
   useEffect(() => {
     const loadRecommendations = async () => {
-      const { data } = await supabase
-        .from('menu_recommendations')
-        .select('menu_name, votes')
-        .order('created_at', { ascending: false })
-        .limit(5);
-      
-      if (data) {
+      try {
+        const data = await fetchRecommendations(5);
         setRecentRecommendations(data);
+      } catch (error) {
+        console.error('추천 메뉴 로딩 실패:', error);
       }
     };
-    
     loadRecommendations();
   }, [submitSuccess]);
   
@@ -176,24 +134,21 @@ const HomePage = () => {
     }
   };
   
-  // ✅ 건의사항 제출 (Supabase 저장)
+  // ✅ 건의사항 제출 (API로 변경)
   const handleSubmitFeedback = async () => {
     if (!feedbackText.trim()) return;
     
     setSubmitLoading(true);
     try {
-      const { error } = await supabase
-        .from('feedbacks')
-        .insert({
-          user_id: user?.id || null,
-          content: feedbackText.trim(),
-        });
+      const result = await submitFeedback(user?.id || null, feedbackText.trim());
       
-      if (error) throw error;
-      
-      setFeedbackText('');
-      setSubmitSuccess(true);
-      setTimeout(() => setSubmitSuccess(false), 2000);
+      if (result.success) {
+        setFeedbackText('');
+        setSubmitSuccess(true);
+        setTimeout(() => setSubmitSuccess(false), 2000);
+      } else {
+        throw new Error(result.error);
+      }
     } catch (error) {
       console.error('건의사항 제출 실패:', error);
       alert('제출에 실패했습니다. 다시 시도해주세요.');
@@ -202,24 +157,21 @@ const HomePage = () => {
     }
   };
   
-  // ✅ 메뉴 추천 제출 (Supabase 저장)
+  // ✅ 메뉴 추천 제출 (API로 변경)
   const handleSubmitRecommend = async () => {
     if (!recommendText.trim()) return;
     
     setSubmitLoading(true);
     try {
-      const { error } = await supabase
-        .from('menu_recommendations')
-        .insert({
-          user_id: user?.id || null,
-          menu_name: recommendText.trim(),
-        });
+      const result = await submitRecommendation(user?.id || null, recommendText.trim());
       
-      if (error) throw error;
-      
-      setRecommendText('');
-      setSubmitSuccess(true);
-      setTimeout(() => setSubmitSuccess(false), 2000);
+      if (result.success) {
+        setRecommendText('');
+        setSubmitSuccess(true);
+        setTimeout(() => setSubmitSuccess(false), 2000);
+      } else {
+        throw new Error(result.error);
+      }
     } catch (error) {
       console.error('메뉴 추천 실패:', error);
       alert('제출에 실패했습니다. 다시 시도해주세요.');
@@ -240,7 +192,7 @@ const HomePage = () => {
     return name.charAt(0).toUpperCase();
   };
 
-  // ✅ 탭 컨텐츠 렌더링 (수정)
+  // 탭 컨텐츠 렌더링
   const renderTabContent = () => (
     <div className="flex-1 flex flex-col overflow-hidden">
       {activeTab === 'notice' && (
@@ -345,7 +297,7 @@ const HomePage = () => {
             </button>
           </div>
           
-          {/* ✅ 최근 추천된 메뉴 (DB에서 불러오기) */}
+          {/* 최근 추천된 메뉴 */}
           <div className="mt-4 bg-white rounded-2xl p-4 border border-gray-100">
             <p className="text-xs font-medium text-gray-500 mb-2">🔥 최근 추천된 메뉴</p>
             <div className="flex flex-wrap gap-2">
@@ -378,33 +330,21 @@ const HomePage = () => {
     </div>
   );
   
-  // ✅ 카페 목록 불러오기
+  // ✅ 카페 목록 불러오기 (API로 변경)
   useEffect(() => {
     const loadCafes = async () => {
-      const { data, error } = await supabase
-        .from('cafes')
-        .select('*')
-        .order('id');
-      
-      if (!error && data) {
-        // DB 컬럼명을 기존 형식으로 변환
-        const formattedCafes = data.map(cafe => ({
-          id: cafe.id,
-          name: cafe.name,
-          location: cafe.location,
-          imageUrl: cafe.image_url,
-          isOpen: cafe.is_open,
-          waitTime: cafe.wait_time,
-          rating: cafe.rating,
-        }));
-        setCafes(formattedCafes);
+      try {
+        const data = await fetchCafes();
+        setCafes(data);
+      } catch (error) {
+        console.error('카페 목록 로딩 실패:', error);
       }
       setCafesLoading(false);
     };
     
     loadCafes();
     
-    // 실시간 구독
+    // 실시간 구독은 Supabase 유지 (WebSocket)
     const channel = supabase
       .channel('cafes-home-channel')
       .on(
@@ -648,7 +588,7 @@ const HomePage = () => {
         </div>
       </main>
       
-      {/* ✅ 모바일 플로팅 버튼 */}
+      {/* 모바일 플로팅 버튼 */}
       <div className="lg:hidden fixed bottom-6 right-6 flex flex-col gap-3">
         <button 
           onClick={() => navigate('/admin')}
@@ -664,23 +604,19 @@ const HomePage = () => {
         </button>
       </div>
       
-      {/* ✅ 모바일 바텀시트 */}
+      {/* 모바일 바텀시트 */}
       {showMobilePanel && (
         <div className="lg:hidden fixed inset-0 z-50">
-          {/* 배경 오버레이 */}
           <div 
             className="absolute inset-0 bg-black/50"
             onClick={() => setShowMobilePanel(false)}
           />
           
-          {/* 바텀시트 */}
           <div className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl max-h-[85vh] flex flex-col animate-slide-up">
-            {/* 핸들 */}
             <div className="flex justify-center pt-3 pb-2">
               <div className="w-10 h-1 bg-gray-300 rounded-full" />
             </div>
             
-            {/* 헤더 */}
             <div className="flex items-center justify-between px-6 pb-4">
               <h3 className="text-lg font-bold text-gray-900">소식 & 의견</h3>
               <button 
@@ -691,7 +627,6 @@ const HomePage = () => {
               </button>
             </div>
             
-            {/* 탭 */}
             <div className="flex bg-gray-100 rounded-2xl p-1 mx-6 mb-4">
               <button
                 onClick={() => setActiveTab('notice')}
@@ -719,7 +654,6 @@ const HomePage = () => {
               </button>
             </div>
             
-            {/* 탭 컨텐츠 */}
             <div className="flex-1 overflow-auto px-6 pb-6">
               {renderTabContent()}
             </div>
