@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { getMenusByCafeId } from '../data/menuData';
+import AiRecommendModal from '../components/AiRecommendModal';
 
 // 아이콘 컴포넌트들 (변경 없음)
 const ArrowLeftIcon = () => (
@@ -48,7 +49,9 @@ const XIcon = () => (
 const MenuPage = () => {
   const navigate = useNavigate();
   const { cafeId } = useParams();
-  
+
+  const [showAiModal, setShowAiModal] = useState(false);
+
   // 수정된 부분: Context에서 가져오는 변수명 변경
   // items: 장바구니 목록, addItem: 추가 함수, totalItems: 총 개수 (함수가 아닌 값)
   const { items: cartItems, addItem, totalItems } = useCart();
@@ -406,6 +409,22 @@ const MenuPage = () => {
           </div>
         </div>
       )}
+
+      {/* ✅ AI 버튼 - 여기로 이동! */}
+      <button 
+        onClick={() => setShowAiModal(true)}
+        className="fixed bottom-24 right-6 w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full shadow-lg flex items-center justify-center text-2xl z-40"
+      >
+        🤖
+      </button>
+      
+      {/* AI 모달 */}
+      <AiRecommendModal 
+        isOpen={showAiModal} 
+        onClose={() => setShowAiModal(false)}
+        cafeId={cafeId}
+      />
+
     </div>
   );
 };
