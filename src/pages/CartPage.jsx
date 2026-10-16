@@ -173,9 +173,10 @@ const CartPage = () => {
               
               {/* 데스크탑 주문 버튼 */}
               <div className="hidden lg:block mt-6">
-                <Button size="full" onClick={() => navigate('/order')}>
-                  {formatPrice(totalPrice)}원 주문하기
+                <Button size="full" disabled>
+                  주문 기능 점검 중
                 </Button>
+                <p className="mt-2 text-sm text-gray-500 text-center">현재 주문과 결제를 진행할 수 없습니다.</p>
               </div>
             </div>
           </div>
@@ -189,8 +190,8 @@ const CartPage = () => {
             <span className="text-gray-600">총 {totalItems}개</span>
             <span className="text-xl font-bold text-gray-900">{formatPrice(totalPrice)}원</span>
           </div>
-          <Button size="full" onClick={() => navigate('/order')}>
-            주문하기
+          <Button size="full" disabled>
+            주문 기능 점검 중
           </Button>
         </div>
       </div>
