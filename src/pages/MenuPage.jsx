@@ -52,9 +52,7 @@ const MenuPage = () => {
 
   const [showAiModal, setShowAiModal] = useState(false);
 
-  // 수정된 부분: Context에서 가져오는 변수명 변경
-  // items: 장바구니 목록, addItem: 추가 함수, totalItems: 총 개수 (함수가 아닌 값)
-  const { items: cartItems, addItem, totalItems } = useCart();
+  const { addItem, totalItems } = useCart();
   
   // 카페별 메뉴 데이터 가져오기
   const cafeData = useMemo(() => getMenusByCafeId(cafeId), [cafeId]);

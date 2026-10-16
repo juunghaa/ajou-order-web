@@ -25,30 +25,29 @@ const OrderHistoryPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setOrders(data || []);
+      } catch (error) {
+        console.error('주문 내역 로드 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (user) {
       loadOrders();
     } else {
       setLoading(false);
     }
   }, [user]);
-
-  // ✅ Supabase에서 주문 내역 가져오기
-  const loadOrders = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setOrders(data || []);
-    } catch (error) {
-      console.error('주문 내역 로드 실패:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);

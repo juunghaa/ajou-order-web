@@ -86,7 +86,6 @@ const HomePage = () => {
   const { user, logout } = useAuth();
   
   const [cafes, setCafes] = useState([]);
-  const [cafesLoading, setCafesLoading] = useState(true);
   
   const [activeTab, setActiveTab] = useState('notice');
   const [feedbackText, setFeedbackText] = useState('');
@@ -339,7 +338,6 @@ const HomePage = () => {
       } catch (error) {
         console.error('카페 목록 로딩 실패:', error);
       }
-      setCafesLoading(false);
     };
     
     loadCafes();
@@ -385,12 +383,6 @@ const HomePage = () => {
             </div>
             
             <div className="flex items-center gap-4">
-              <button 
-                onClick={() => navigate('/admin')}
-                className="text-sm text-gray-500 hover:text-ajou-primary transition-colors"
-              >
-                관리자
-              </button>
               <span className="text-sm text-gray-500 hidden sm:block">아주대학교</span>
               
               {user ? (
@@ -590,12 +582,6 @@ const HomePage = () => {
       
       {/* 모바일 플로팅 버튼 */}
       <div className="lg:hidden fixed bottom-6 right-6 flex flex-col gap-3">
-        <button 
-          onClick={() => navigate('/admin')}
-          className="w-12 h-12 bg-gray-700 text-white rounded-full shadow-lg flex items-center justify-center text-lg"
-        >
-          ⚙️
-        </button>
         <button 
           onClick={() => setShowMobilePanel(true)}
           className="w-14 h-14 bg-ajou-primary text-white rounded-full shadow-lg flex items-center justify-center text-xl"
