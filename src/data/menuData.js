@@ -394,4 +394,6 @@ export const getMenusByCafeId = (cafeId) => {
   }
 };
 
-export default { CAFE_ING_MENUS, PANDOROSY_MENUS, getMenusByCafeId };
+const menuData = { CAFE_ING_MENUS, PANDOROSY_MENUS, getMenusByCafeId };
+
+export default menuData;

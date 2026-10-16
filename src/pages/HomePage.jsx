@@ -86,7 +86,6 @@ const HomePage = () => {
   const { user, logout } = useAuth();
   
   const [cafes, setCafes] = useState([]);
-  const [cafesLoading, setCafesLoading] = useState(true);
   
   const [activeTab, setActiveTab] = useState('notice');
   const [feedbackText, setFeedbackText] = useState('');
@@ -339,7 +338,6 @@ const HomePage = () => {
       } catch (error) {
         console.error('카페 목록 로딩 실패:', error);
       }
-      setCafesLoading(false);
     };
     
     loadCafes();
