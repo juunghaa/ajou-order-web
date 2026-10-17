@@ -20,6 +20,15 @@ export const fetchCafes = async () => {
   return [];
 };
 
+// 서버가 주문 견적에 사용하는 메뉴·가격을 우선 표시합니다.
+export const fetchMenuCatalog = async (cafeId) => {
+  const res = await fetch(`${API_BASE_URL}/menus/${encodeURIComponent(cafeId)}`);
+  if (!res.ok) throw new Error('메뉴 목록을 불러오지 못했습니다.');
+  const result = await res.json();
+  if (!result.success || !result.data?.menus) throw new Error('메뉴 목록이 올바르지 않습니다.');
+  return result.data;
+};
+
 // ✅ 건의사항 제출
 export const submitFeedback = async (userId, content) => {
   const res = await fetch(`${API_BASE_URL}/feedbacks`, {

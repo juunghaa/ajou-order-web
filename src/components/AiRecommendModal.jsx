@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { getMenusByCafeId } from '../data/menuData';
 
-const AiRecommendModal = ({ isOpen, onClose, cafeId }) => {
+const AiRecommendModal = ({ isOpen, onClose, cafeId, cafeData }) => {
   const [message, setMessage] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
@@ -11,7 +10,6 @@ const AiRecommendModal = ({ isOpen, onClose, cafeId }) => {
     
     setLoading(true);
     try {
-      const cafeData = getMenusByCafeId(cafeId);
       const menuList = cafeData.menus.map(m => 
         `${m.name} (${m.price}원, ${m.category})`
       );
