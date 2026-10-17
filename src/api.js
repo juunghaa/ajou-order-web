@@ -1,5 +1,31 @@
 // 백엔드 서버 주소
-const API_BASE_URL = 'https://ajou-order-server.onrender.com/api';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://ajou-order-server.onrender.com/api';
+
+const authenticatedOrderPost = async (path, body, accessToken) => {
+  if (!accessToken) throw new Error('로그인이 필요합니다.');
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify(body),
+  });
+  const result = await res.json();
+  if (!res.ok || !result.success) throw new Error(result.error || '주문을 확인할 수 없습니다.');
+  return result.data;
+};
+
+export const createOrderIntent = (cart, note, accessToken) => authenticatedOrderPost(
+  '/orders/intents',
+  {
+    cafeId: cart.cafe.id,
+    note,
+    items: cart.items.map(({ id, quantity, options }) => ({ id, quantity, options })),
+  },
+  accessToken,
+);
+
+export const confirmTossOrder = (payment, accessToken) => authenticatedOrderPost(
+  '/orders/confirm', payment, accessToken,
+);
 
 // ✅ 카페 목록 조회
 export const fetchCafes = async () => {
