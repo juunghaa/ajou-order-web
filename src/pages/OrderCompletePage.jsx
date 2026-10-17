@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
 
 const CheckCircleIcon = () => (
   <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -30,24 +29,16 @@ const ListIcon = () => (
 const OrderCompletePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { clearCart } = useCart();
+  const orderInfo = location.state;
+  const hasValidOrder = Boolean(orderInfo?.orderId && Array.isArray(orderInfo.items));
 
-  const orderInfo = location.state || {
-    orderId: 'ORD-003',
-    orderNumber: 3,
-    waitingNumber: 2,
-    cafeName: '학생회관 카페',
-    items: [
-      { name: '아메리카노', quantity: 2 },
-      { name: '카페라떼', quantity: 1 },
-    ],
-    totalPrice: 13000,
-    estimatedTime: '10-15분',
-  };
-  
   useEffect(() => {
-    clearCart();
-  }, []);
+    if (!hasValidOrder) {
+      navigate('/orders', { replace: true });
+    }
+  }, [hasValidOrder, navigate]);
+
+  if (!hasValidOrder) return null;
 
   return (
     <div className="h-screen bg-gradient-to-b from-ajou-primary to-ajou-secondary flex flex-col overflow-hidden">
