@@ -6,16 +6,10 @@ import Button from '../components/common/Button';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { createOrderIntent } from '../api';
 
 // 토스 테스트 클라이언트 키
-const TOSS_CLIENT_KEY = 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq';
-
-const CreditCardIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-    <line x1="1" y1="10" x2="23" y2="10" />
-  </svg>
-);
+const TOSS_CLIENT_KEY = process.env.REACT_APP_TOSS_CLIENT_KEY || 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq';
 
 const TossIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -24,23 +18,14 @@ const TossIcon = () => (
   </svg>
 );
 
-const WalletIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-    <path d="M21 4H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z" />
-    <circle cx="18" cy="12" r="2" />
-  </svg>
-);
-
 const PAYMENT_METHODS = [
-  { id: 'card', name: '신용/체크카드', icon: CreditCardIcon },
-  { id: 'toss', name: '토스페이', icon: TossIcon },
-  { id: 'kakao', name: '카카오페이', icon: WalletIcon },
+  { id: 'toss', name: '카드 테스트 결제', icon: TossIcon },
 ];
 
 const OrderPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth(); 
-  const { items, cafe, totalPrice, clearCart } = useCart();
+  const { items, cafe, totalPrice } = useCart();
   
   const [selectedPayment, setSelectedPayment] = useState('toss');
   const [loading, setLoading] = useState(false);
@@ -76,129 +61,42 @@ const OrderPage = () => {
   }
   
   const handleOrder = async () => {
+    if (isProcessingRef.current) return;
     setLoading(true);
-    isProcessingRef.current = true;  // ✅ 처리 시작
-    
-    try {
-      // 1. 주문번호 생성
-      const orderId = `ORDER_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // 2. 해당 카페의 오늘 마지막 주문번호 조회
-      const now = new Date();
-      const koreaDateStr = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }); // "2024-12-08"
-      const todayStartKorea = new Date(koreaDateStr + 'T00:00:00+09:00').toISOString();
-      // console.log('한국 기준 오늘 시작:', todayStartKorea);  // 디버깅용
+    isProcessingRef.current = true;
 
-      const { data: lastOrders } = await supabase
-        .from('orders')
-        .select('order_number')
-        .eq('cafe_id', cafe?.id)
-        .gte('created_at', todayStartKorea)  // 한국 시간 기준
-        .order('order_number', { ascending: false })
-        .limit(1);
-      
-      const lastOrder = lastOrders?.[0] || null;
-      const nextOrderNumber = lastOrder ? lastOrder.order_number + 1 : 1;
-      
-      // 3. 대기중인 주문 수 조회
-      const { count: pendingCount } = await supabase
-        .from('orders')
-        .select('*', { count: 'exact', head: true })
-        .eq('cafe_id', cafe?.id)
-        .in('status', ['pending', 'preparing']);
-      
-      const waitingNumber = (pendingCount || 0) + 1;
-      
-      // ✅ 4. 현재 items 복사 (clearCart 전에)
-      const currentItems = [...items];
-      const currentTotalPrice = totalPrice;
-      const currentCafeName = cafe?.name;
-      const currentCafeId = cafe?.id;
-      
-      // 5. 주문 정보 임시 저장 (결제 전)
-      const orderData = {
-        orderId,
-        orderNumber: nextOrderNumber,
-        waitingNumber,
-        cafeName: currentCafeName,
-        cafeId: currentCafeId,
-        items: currentItems,
-        totalPrice: currentTotalPrice,
-        note: orderNote,
-        paymentMethod: selectedPayment,
-        estimatedTime: `${Math.max(5, waitingNumber * 3)}-${Math.max(10, waitingNumber * 5)}분`,
-      };
-      
-      // localStorage에 임시 저장 (결제 성공 후 사용)
-      localStorage.setItem('pendingOrder', JSON.stringify(orderData));
-      
-      // 6. 토스 결제인 경우
-      if (selectedPayment === 'toss' && tossPayments) {
-        await tossPayments.requestPayment('카드', {
-          amount: currentTotalPrice,
-          orderId: orderId,
-          orderName: currentItems.length > 1 
-            ? `${currentItems[0].name} 외 ${currentItems.length - 1}건` 
-            : currentItems[0].name,
-          customerName: user?.user_metadata?.display_name || '고객',
-          successUrl: `${window.location.origin}/payment/success`,
-          failUrl: `${window.location.origin}/payment/fail`,
-        });
-        return; // 토스 결제 페이지로 리다이렉트
+    try {
+      if (!user || !cafe || !tossPayments) throw new Error('로그인과 결제 준비 상태를 확인해 주세요.');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('다시 로그인해 주세요.');
+
+      const intent = await createOrderIntent({ cafe, items }, orderNote, session.access_token);
+      if (intent.amount !== totalPrice) {
+        throw new Error('장바구니와 서버 금액이 다릅니다. 메뉴를 다시 확인해 주세요.');
       }
-      
-      // 7. 다른 결제 수단 (시뮬레이션)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const { data, error } = await supabase
-        .from('orders')
-        .insert({
-          user_id: user?.id || null,
-          cafe_id: currentCafeId,
-          cafe_name: currentCafeName,
-          items: currentItems,
-          total_price: currentTotalPrice,
-          status: 'pending',
-          note: orderNote,
-          payment_method: selectedPayment,
-          order_number: nextOrderNumber,
-        })
-        .select()
-        .single();
-      
-      if (error) throw error;
-      
-      localStorage.removeItem('pendingOrder');
-      
-      // ✅ navigate 먼저, clearCart 나중에!
-      navigate('/order/complete', { 
-        replace: true,  // ✅ 뒤로가기 방지
-        state: {
-          orderId: data.id,
-          orderNumber: nextOrderNumber,
-          waitingNumber: waitingNumber,
-          cafeName: currentCafeName,
-          items: currentItems,
-          totalPrice: currentTotalPrice,
-          estimatedTime: orderData.estimatedTime,
-        }
+      localStorage.setItem('pendingOrder', JSON.stringify({
+        orderId: intent.orderId, amount: intent.amount,
+        cafeName: cafe.name, items,
+      }));
+
+      await tossPayments.requestPayment('카드', {
+        amount: intent.amount,
+        orderId: intent.orderId,
+        orderName: items.length > 1 ? `${items[0].name} 외 ${items.length - 1}건` : items[0].name,
+        customerName: user.user_metadata?.display_name || '고객',
+        successUrl: `${window.location.origin}/payment/success`,
+        failUrl: `${window.location.origin}/payment/fail`,
       });
-      
-      // ✅ navigate 후 clearCart
-      setTimeout(() => {
-        clearCart();
-      }, 100);
-      
     } catch (error) {
       console.error('주문 실패:', error);
-      isProcessingRef.current = false;  // ✅ 에러 시 플래그 해제
-      
+      localStorage.removeItem('pendingOrder');
       if (error.code === 'USER_CANCEL') {
         alert('결제가 취소되었습니다.');
       } else {
-        alert('주문 처리 중 오류가 발생했습니다.');
+        alert(error.message || '주문 처리 중 오류가 발생했습니다.');
       }
     } finally {
+      isProcessingRef.current = false;
       setLoading(false);
     }
   };

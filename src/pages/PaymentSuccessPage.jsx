@@ -1,95 +1,68 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { confirmTossOrder } from '../api';
 
 const PaymentSuccessPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
   const { clearCart } = useCart();
-  const [loading, setLoading] = useState(true);
+  const inFlight = useRef(false);
+  const [message, setMessage] = useState('결제와 주문을 확인하는 중입니다.');
+  const [retryable, setRetryable] = useState(false);
 
-  useEffect(() => {
-    const processPayment = async () => {
-      try {
-        // URL 파라미터에서 결제 정보 가져오기
-        const paymentKey = searchParams.get('paymentKey');
-        const orderId = searchParams.get('orderId');
-        const amount = searchParams.get('amount');
-
-        console.log('결제 성공:', { paymentKey, orderId, amount });
-
-        // localStorage에서 주문 정보 가져오기
-        const pendingOrder = JSON.parse(localStorage.getItem('pendingOrder'));
-        
-        if (!pendingOrder) {
-          throw new Error('주문 정보를 찾을 수 없습니다.');
-        }
-
-        // Supabase에 주문 저장
-        const { data, error } = await supabase
-          .from('orders')
-          .insert({
-            user_id: user?.id || null,
-            cafe_id: pendingOrder.cafeId,
-            cafe_name: pendingOrder.cafeName,
-            items: pendingOrder.items,
-            total_price: pendingOrder.totalPrice,
-            status: 'pending',
-            note: pendingOrder.note,
-            payment_method: 'toss',
-            order_number: pendingOrder.orderNumber,
-          })
-          .select()
-          .single();
-
-        if (error) throw error;
-
-        // 장바구니 비우기
-        clearCart();
-        localStorage.removeItem('pendingOrder');
-
-        // 주문 완료 페이지로 이동
-        navigate('/order/complete', {
-          replace: true,
-          state: {
-            orderId: data.id,
-            orderNumber: pendingOrder.orderNumber,
-            waitingNumber: pendingOrder.waitingNumber,
-            cafeName: pendingOrder.cafeName,
-            items: pendingOrder.items,
-            totalPrice: pendingOrder.totalPrice,
-            estimatedTime: pendingOrder.estimatedTime,
-            paymentKey, // 토스 결제 키 저장
-          }
-        });
-
-      } catch (error) {
-        console.error('결제 처리 실패:', error);
-        alert('결제 처리 중 오류가 발생했습니다.');
-        navigate('/');
-      } finally {
-        setLoading(false);
+  const verifyPayment = useCallback(async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    setRetryable(false);
+    setMessage('결제와 주문을 확인하는 중입니다.');
+    try {
+      const paymentKey = searchParams.get('paymentKey');
+      const orderId = searchParams.get('orderId');
+      const amount = Number(searchParams.get('amount'));
+      if (!paymentKey || !orderId || !Number.isSafeInteger(amount) || amount <= 0) {
+        throw new Error('결제 결과 정보가 올바르지 않습니다.');
       }
-    };
 
-    processPayment();
-  }, []);
+      let pending;
+      try { pending = JSON.parse(localStorage.getItem('pendingOrder') || 'null'); }
+      catch (_error) { localStorage.removeItem('pendingOrder'); }
+      if (pending && (pending.orderId !== orderId || pending.amount !== amount)) {
+        throw new Error('브라우저에 저장된 주문 정보와 결제 결과가 다릅니다.');
+      }
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('결제 확인을 위해 다시 로그인해 주세요.');
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-ajou-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">결제 처리 중...</p>
-        </div>
+      const confirmed = await confirmTossOrder({ paymentKey, orderId, amount }, session.access_token);
+      localStorage.removeItem('pendingOrder');
+      clearCart();
+      // Only the server-confirmed order ID establishes completion.
+      navigate('/orders', { replace: true, state: { confirmedOrderId: confirmed.orderId } });
+    } catch (error) {
+      setMessage(error.message || '결제 상태를 확인할 수 없습니다.');
+      setRetryable(true);
+    } finally {
+      inFlight.current = false;
+    }
+  }, [searchParams, navigate, clearCart]);
+
+  useEffect(() => { verifyPayment(); }, [verifyPayment]);
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <div className="max-w-sm w-full bg-white rounded-2xl shadow-card p-6 text-center">
+        <h1 className="text-xl font-bold mb-3">결제 확인</h1>
+        <p className="text-gray-600 mb-5">{message}</p>
+        {retryable && (
+          <button type="button" onClick={verifyPayment}
+            className="w-full py-3 rounded-xl bg-ajou-primary text-white font-medium">
+            다시 확인하기
+          </button>
+        )}
       </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 };
 
 export default PaymentSuccessPage;

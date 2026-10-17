@@ -5,6 +5,12 @@
 > 메뉴 화면은 기존 메뉴를 즉시 표시한 뒤 서버 목록을 받아 갱신합니다.
 > 주문 금액의 최종 검증은 서버 견적 API를 사용하도록 준비 중이며, 결제는 계속 중지됩니다.
 
+토스 테스트 결제 화면 연결은 초안으로 준비했으며 기본 경로는 계속 점검 화면입니다.
+별도 테스트 환경에서만 `REACT_APP_ENABLE_TEST_CHECKOUT=true`로 주문·결제 성공 경로를 열 수 있습니다.
+이때 `REACT_APP_API_BASE_URL`은 검증 중인 서버의 `/api` 주소로, `REACT_APP_TOSS_CLIENT_KEY`는
+서버의 `TOSS_TEST_SECRET_KEY`와 같은 토스 테스트 키 세트로 설정해야 합니다. 서버 마이그레이션과
+승인 기능이 준비되지 않았다면 이 플래그를 켜지 마세요.
+
 아주대학교 캠퍼스 내 카페에서 모바일로 간편하게 주문하고 결제할 수 있는 **웹 기반 주문 서비스**입니다.
 대기 시간을 줄이고, 실시간 주문 상태 확인과 AI 메뉴 추천을 통해 사용자 경험을 향상시키는 것을 목표로 합니다.
 
@@ -57,44 +63,25 @@ src/
 
 ## 🚀 설치 및 실행
 
-### 1. 필수 패키지 설치
+### 1. 패키지 설치
 
 ```bash
-npm install react-router-dom @supabase/supabase-js tailwindcss postcss autoprefixer
+npm install
 ```
 
-### 2. Tailwind CSS 설정
+### 2. 실행
 
 ```bash
-npx tailwindcss init -p
+npm start
 ```
 
-`tailwind.config.js`를 프로젝트 설정에 맞게 수정합니다.
-
-### 3. Supabase 설정
-
-`src/lib/supabase.js` 파일 생성 후 본인 프로젝트 정보로 설정합니다.
-
-```javascript
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-```
-
-`.env` 파일 예시:
-
-```
-VITE_SUPABASE_URL=YOUR_SUPABASE_URL
-VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-```
-
-### 4. 실행
+별도 테스트 서버와 토스 테스트 키가 준비된 경우에만 로컬 `.env.local`에 다음 값을 설정합니다.
+이 파일은 Git에 올리지 않습니다.
 
 ```bash
-npm run dev
+REACT_APP_API_BASE_URL=https://YOUR_TEST_SERVER/api
+REACT_APP_TOSS_CLIENT_KEY=test_ck_YOUR_MATCHING_CLIENT_KEY
+REACT_APP_ENABLE_TEST_CHECKOUT=true
 ```
 
 ---
