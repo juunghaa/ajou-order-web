@@ -63,44 +63,25 @@ src/
 
 ## 🚀 설치 및 실행
 
-### 1. 필수 패키지 설치
+### 1. 패키지 설치
 
 ```bash
-npm install react-router-dom @supabase/supabase-js tailwindcss postcss autoprefixer
+npm install
 ```
 
-### 2. Tailwind CSS 설정
+### 2. 실행
 
 ```bash
-npx tailwindcss init -p
+npm start
 ```
 
-`tailwind.config.js`를 프로젝트 설정에 맞게 수정합니다.
-
-### 3. Supabase 설정
-
-`src/lib/supabase.js` 파일 생성 후 본인 프로젝트 정보로 설정합니다.
-
-```javascript
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-```
-
-`.env` 파일 예시:
-
-```
-VITE_SUPABASE_URL=YOUR_SUPABASE_URL
-VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-```
-
-### 4. 실행
+별도 테스트 서버와 토스 테스트 키가 준비된 경우에만 로컬 `.env.local`에 다음 값을 설정합니다.
+이 파일은 Git에 올리지 않습니다.
 
 ```bash
-npm run dev
+REACT_APP_API_BASE_URL=https://YOUR_TEST_SERVER/api
+REACT_APP_TOSS_CLIENT_KEY=test_ck_YOUR_MATCHING_CLIENT_KEY
+REACT_APP_ENABLE_TEST_CHECKOUT=true
 ```
 
 ---
