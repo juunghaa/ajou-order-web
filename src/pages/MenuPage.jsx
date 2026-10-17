@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { getMenusByCafeId } from '../data/menuData';
 import AiRecommendModal from '../components/AiRecommendModal';
+import { fetchMenuCatalog } from '../api';
 
 // 아이콘 컴포넌트들 (변경 없음)
 const ArrowLeftIcon = () => (
@@ -54,8 +55,19 @@ const MenuPage = () => {
 
   const { addItem, totalItems } = useCart();
   
-  // 카페별 메뉴 데이터 가져오기
-  const cafeData = useMemo(() => getMenusByCafeId(cafeId), [cafeId]);
+  // 서버가 응답할 때까지는 기존 메뉴 스냅샷을 표시합니다.
+  const fallbackCatalog = useMemo(() => getMenusByCafeId(cafeId), [cafeId]);
+  const [cafeData, setCafeData] = useState(fallbackCatalog);
+
+  useEffect(() => {
+    let active = true;
+    setCafeData(fallbackCatalog);
+    fetchMenuCatalog(cafeId)
+      .then((catalog) => { if (active) setCafeData(catalog); })
+      .catch((error) => console.error('서버 메뉴 목록 로딩 실패:', error));
+    return () => { active = false; };
+  }, [cafeId, fallbackCatalog]);
+
   const { cafeName, categories, menus } = cafeData;
   
   const [selectedCategory, setSelectedCategory] = useState('전체');
@@ -420,6 +432,7 @@ const MenuPage = () => {
         isOpen={showAiModal} 
         onClose={() => setShowAiModal(false)}
         cafeId={cafeId}
+        cafeData={cafeData}
       />
 
     </div>
