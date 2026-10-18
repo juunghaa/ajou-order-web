@@ -1,12 +1,10 @@
 # AjouOrder - 아주대 캠퍼스 카페 주문 앱
 
-> 보안 점검 1단계에서는 주문·결제·관리자 화면에 점검 안내가 표시됩니다.
-> 카페·메뉴 조회와 로그인 사용자의 본인 주문 내역은 계속 사용할 수 있습니다.
-> 메뉴 화면은 기존 메뉴를 즉시 표시한 뒤 서버 목록을 받아 갱신합니다.
-> 주문 금액의 최종 검증은 서버 견적 API를 사용하도록 준비 중이며, 결제는 계속 중지됩니다.
+> **현재 상태 (2026-10-17)**: 사후 점검에서 주문·결제·관리자 권한 문제가 확인되어 **주문·결제·관리자 기능은 의도적으로 중지**했습니다. 중지 중에도 카페·메뉴 조회, 로그인, AI 메뉴 추천, 로그인 사용자의 본인 주문 내역은 사용할 수 있습니다.
+> 발견한 문제, 적용한 조치, 남은 한계는 [docs/REVIEW.md](docs/REVIEW.md)에 정리했습니다.
 
-아주대학교 캠퍼스 내 카페에서 모바일로 간편하게 주문하고 결제할 수 있는 **웹 기반 주문 서비스**입니다.
-대기 시간을 줄이고, 실시간 주문 상태 확인과 AI 메뉴 추천을 통해 사용자 경험을 향상시키는 것을 목표로 합니다.
+아주대학교 캠퍼스 카페의 모바일 주문 흐름을 구현한 **웹 프로젝트**입니다. 현재 주문·결제 기능은 사후 점검에 따라 중지했습니다.
+카페·메뉴 탐색과 AI 메뉴 추천을 제공하며, 주문 상태 확인은 이전 구현의 점검 대상입니다.
 
 ## 🔗 프로젝트 링크
 
@@ -60,41 +58,17 @@ src/
 ### 1. 필수 패키지 설치
 
 ```bash
-npm install react-router-dom @supabase/supabase-js tailwindcss postcss autoprefixer
+npm install
 ```
 
-### 2. Tailwind CSS 설정
+### 2. Supabase 설정
+
+현재 `src/lib/supabase.js`에 Supabase URL과 anon 키가 직접 들어 있습니다. anon 키는 브라우저에 공개되는 키이므로 데이터 접근 제어는 Supabase RLS 정책이 담당합니다(점검 내용은 [docs/REVIEW.md](docs/REVIEW.md) 참고). 본인 Supabase 프로젝트로 실행하려면 이 파일의 값을 교체하세요. 환경변수(`.env`) 방식으로의 전환은 아직 하지 않았습니다.
+
+### 3. 실행
 
 ```bash
-npx tailwindcss init -p
-```
-
-`tailwind.config.js`를 프로젝트 설정에 맞게 수정합니다.
-
-### 3. Supabase 설정
-
-`src/lib/supabase.js` 파일 생성 후 본인 프로젝트 정보로 설정합니다.
-
-```javascript
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-```
-
-`.env` 파일 예시:
-
-```
-VITE_SUPABASE_URL=YOUR_SUPABASE_URL
-VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-```
-
-### 4. 실행
-
-```bash
-npm run dev
+npm start
 ```
 
 ---
@@ -127,33 +101,32 @@ npm run dev
 2. **메뉴 조회** - 카테고리/검색 기반 메뉴 탐색
 3. **옵션 선택** - 온도, 사이즈, 추가 옵션 선택
 4. **장바구니** - 수량 조절, 삭제, 카페 변경 시 초기화 확인
-5. **주문 및 결제** - 결제 수단 선택 및 주문 처리
-6. **주문 완료 화면** - 주문 번호 및 상태 확인
+5. **주문 및 결제** - 결제 수단 선택 및 주문 처리 *(현재 중지: 점검 중)*
+6. **주문 완료 화면** - 주문 번호 및 상태 확인 *(현재 중지: 점검 중)*
 
 ---
 
 ## ⚡ 고급 기능 (Advanced Features)
 
-### 💳 토스페이먼츠 결제 연동
+### 💳 토스페이먼츠 결제 연동 (테스트 모드, 현재 중지)
 
-* 토스페이먼츠 SDK를 활용한 **실제 결제 플로우 구현 (테스트 모드)**
-* 카드 결제, 토스페이, 카카오페이 등 다양한 결제 수단 지원
-* 결제 성공/실패 콜백 처리
-* 결제 실패 시 주문 데이터 복구 및 예외 처리
+* 토스페이먼츠 SDK로 **결제창 호출 → 성공/실패 페이지 이동**까지 구현했습니다(테스트 키 사용).
+* **서버 측 결제 승인과 금액 검증은 구현되어 있지 않습니다.** 그래서 실제 서비스에서 쓸 수 있는 결제 흐름으로 보지 않고 결제 기능을 중지했습니다.
+* 토스 외 결제 수단은 실제 결제 없이 주문만 생성하는 시뮬레이션이었습니다.
 
 ### 🤖 AI 메뉴 추천 (Groq LLM)
 
-* **Groq API (Llama 3.1)** 기반 AI 바리스타 기능
+* **Groq API (`openai/gpt-oss-20b`)** 기반 AI 바리스타 기능
 * 카페별 실제 메뉴 데이터 기반 추천
 * 자연어 질의 지원 (예: "달달한 음료 추천해줘")
 * 가격과 메뉴명을 포함한 구체적인 추천 응답
 * **AI 추천 API**: `POST /api/ai/recommend`
 
-### 🔄 실시간 주문 상태 업데이트
+### 🔄 Supabase Realtime
 
-* Supabase Realtime(WebSocket) 기반 실시간 동기화
-* 관리자 주문 상태 변경 시 사용자 화면 즉시 반영
-* 카페 영업 상태 실시간 업데이트
+* 홈 화면의 카페 영업 상태가 Supabase Realtime(WebSocket)으로 갱신됩니다.
+* 관리자 화면의 주문·카페 목록 갱신에도 사용했으나, 관리자 화면은 현재 중지 상태입니다.
+* 사용자 화면의 주문 상태 실시간 반영은 구현하지 않았습니다.
 
 ---
 
@@ -172,7 +145,7 @@ npm run dev
 
 ### Frontend
 
-* React 18
+* React 19
 * React Router DOM
 * Tailwind CSS
 
@@ -192,7 +165,7 @@ npm run dev
 
 ### AI
 
-* Groq API (Llama 3.1)
+* Groq API (`openai/gpt-oss-20b`)
 
 ### Deployment
 
