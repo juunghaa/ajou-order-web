@@ -20,7 +20,7 @@ export const fetchCafes = async () => {
   return [];
 };
 
-// 서버가 주문 견적에 사용하는 메뉴·가격을 우선 표시합니다.
+// 메뉴와 가격은 서버가 Supabase에서 읽은 값만 표시합니다.
 export const fetchMenuCatalog = async (cafeId) => {
   const res = await fetch(`${API_BASE_URL}/menus/${encodeURIComponent(cafeId)}`);
   if (!res.ok) throw new Error('메뉴 목록을 불러오지 못했습니다.');

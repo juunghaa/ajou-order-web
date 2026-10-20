@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { getMenusByCafeId } from '../data/menuData';
 import AiRecommendModal from '../components/AiRecommendModal';
 import { fetchMenuCatalog } from '../api';
 
@@ -55,20 +54,21 @@ const MenuPage = () => {
 
   const { addItem, totalItems } = useCart();
   
-  // 서버가 응답할 때까지는 기존 메뉴 스냅샷을 표시합니다.
-  const fallbackCatalog = useMemo(() => getMenusByCafeId(cafeId), [cafeId]);
-  const [cafeData, setCafeData] = useState(fallbackCatalog);
+  const [cafeData, setCafeData] = useState(null);
+  const [menuError, setMenuError] = useState(false);
 
   useEffect(() => {
     let active = true;
-    setCafeData(fallbackCatalog);
+    setCafeData(null);
+    setMenuError(false);
     fetchMenuCatalog(cafeId)
       .then((catalog) => { if (active) setCafeData(catalog); })
-      .catch((error) => console.error('서버 메뉴 목록 로딩 실패:', error));
+      .catch(() => { if (active) setMenuError(true); });
     return () => { active = false; };
-  }, [cafeId, fallbackCatalog]);
+  }, [cafeId]);
 
-  const { cafeName, categories, menus } = cafeData;
+  const activeCafeData = cafeData?.cafeId === cafeId ? cafeData : null;
+  const { cafeName, categories, menus } = activeCafeData || { cafeName: '', categories: [], menus: [] };
   
   const [selectedCategory, setSelectedCategory] = useState('전체');
   const [searchQuery, setSearchQuery] = useState('');
@@ -152,6 +152,17 @@ const MenuPage = () => {
       });
     }
   };
+
+  if (menuError || !activeCafeData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4 p-6 text-center" role="status">
+        <p className="text-gray-700">
+          {menuError ? '메뉴를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.' : '메뉴를 불러오는 중입니다.'}
+        </p>
+        <button onClick={() => navigate('/')} className="text-blue-700 underline">카페 목록으로 돌아가기</button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
