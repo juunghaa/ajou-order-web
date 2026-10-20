@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { fetchAdminCafes } from '../api';
 
 const ArrowLeftIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -20,6 +21,17 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [hasAdminAccess, setHasAdminAccess] = useState(false);
+
+  useEffect(() => {
+    setHasAdminAccess(false);
+    if (!user) return;
+    let active = true;
+    fetchAdminCafes()
+      .then(() => { if (active) setHasAdminAccess(true); })
+      .catch(() => { if (active) setHasAdminAccess(false); });
+    return () => { active = false; };
+  }, [user]);
 
   const handleSave = async () => {
     if (!nickname.trim()) {
@@ -130,6 +142,14 @@ const ProfilePage = () => {
             </button>
           </div>
         </div>
+
+        {hasAdminAccess && (
+          <div className="mb-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+            <button onClick={() => navigate('/admin')} className="w-full rounded-xl py-3 font-medium text-ajou-primary hover:bg-gray-50">
+              담당 카페 관리
+            </button>
+          </div>
+        )}
 
         {/* 로그아웃 */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">

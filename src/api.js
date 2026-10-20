@@ -1,5 +1,41 @@
 // 백엔드 서버 주소
+import { supabase } from './lib/supabase';
+
 const API_BASE_URL = 'https://ajou-order-server.onrender.com/api';
+
+const adminRequest = async (path, options = {}) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    const error = new Error('로그인이 필요합니다.');
+    error.status = 401;
+    throw error;
+  }
+  const res = await fetch(`${API_BASE_URL}/admin${path}`, {
+    ...options,
+    headers: {
+      ...options.headers,
+      Authorization: `Bearer ${session.access_token}`,
+    },
+  });
+  const result = await res.json();
+  if (!res.ok || !result.success) {
+    const error = new Error(result.error || '관리자 요청에 실패했습니다.');
+    error.status = res.status;
+    throw error;
+  }
+  return result.data;
+};
+
+export const fetchAdminCafes = () => adminRequest('/cafes');
+
+export const updateAdminCafeStatus = (cafeId, isOpen) => adminRequest(
+  `/cafes/${encodeURIComponent(cafeId)}/status`,
+  {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ isOpen }),
+  }
+);
 
 // ✅ 카페 목록 조회
 export const fetchCafes = async () => {
